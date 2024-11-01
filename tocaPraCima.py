@@ -9,6 +9,11 @@ SCREEN_WIDTH, SCREEN_HEIGHT = 800, 600
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Toca pra Cima")
 
+# Carregar a textura do cenário
+
+background_texture = pygame.image.load("sprites/mountain_texture.jpg").convert()
+texture_width, texture_height = background_texture.get_size()
+
 # Configurações do personagem
 character_size = 50
 character_x = SCREEN_WIDTH // 2 - character_size // 2
@@ -42,8 +47,15 @@ while running:
     elif (keys[pygame.K_w] or keys[pygame.K_UP]) and character_y <= SCREEN_HEIGHT * 0.2:
         background_y += background_speed  # Move o cenário para cima
 
-    # Desenho do cenário e do personagem
-    screen.fill((135, 206, 235))  # Cor do fundo
+    # Desenhar a textura de fundo repetidamente para simular a montanha
+    for y in range(-texture_height, SCREEN_HEIGHT, texture_height):
+        screen.blit(background_texture, (0, y + background_y % texture_height))
+
+    # Desenhar o "chão" que se move com o background
+    ground_rect = pygame.Rect(0, SCREEN_HEIGHT + background_y - 50, SCREEN_WIDTH, 50)
+    pygame.draw.rect(screen, (139, 69, 19), ground_rect)  # Marrom para o chão
+
+    # Desenhar o personagem
     pygame.draw.rect(screen, (0, 128, 0), (character_x, character_y, character_size, character_size))
 
     pygame.display.flip()
