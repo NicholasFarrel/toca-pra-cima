@@ -56,9 +56,13 @@ while running:
     # Atualizar posição do cenário e dos sacos de magnésio
     if keys[pygame.K_w] or keys[pygame.K_UP]:  # Move o cenário e os sacos de magnésio para baixo
         if character_y <= SCREEN_HEIGHT * 0.2:
-            background_y += background_speed
+            if(keys[pygame.K_SPACE]):
+                dy = 10
+            else:
+                dy = 0
+            background_y += background_speed + dy
             for magnesio in magnesio_group:
-                magnesio.rect.y += background_speed  # Mover o magnésio conforme o fundo se move
+                magnesio.rect.y += background_speed + dy  # Mover o magnésio conforme o fundo se move
 
     # Verificar colisão do personagem com os sacos de magnésio
     character_rect = pygame.Rect(character_x, character_y, character_size, character_size)
@@ -81,4 +85,4 @@ while running:
     pygame.draw.rect(screen, (0, 128, 0), character_rect)
 
     pygame.display.flip()
-    clock.tick(30)
+    clock.tick(60)
