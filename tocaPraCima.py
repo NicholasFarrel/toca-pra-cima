@@ -20,6 +20,7 @@ character_size = 50
 character_x = SCREEN_WIDTH // 2 - character_size // 2
 character_y = SCREEN_HEIGHT - character_size
 character_speed = 5
+timePassed = 0
 
 # Configurações do cenário
 background_y = 0
@@ -51,7 +52,7 @@ while running:
 
     # Processar a movimentação do personagem usando controles externos
     keys = pygame.key.get_pressed()
-    character_x, character_y = handle_movement(keys, character_x, character_y, character_speed, SCREEN_WIDTH, SCREEN_HEIGHT)
+    character_x, character_y, timePassed = handle_movement(keys, character_x, character_y, character_speed, SCREEN_WIDTH, SCREEN_HEIGHT, timePassed)
 
     # Atualizar posição do cenário e dos sacos de magnésio
     if keys[pygame.K_w] or keys[pygame.K_UP]:  # Move o cenário e os sacos de magnésio para baixo
