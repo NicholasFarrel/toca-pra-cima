@@ -2,6 +2,7 @@ import pygame
 import sys
 from resources import Magnesio, MagnesioBar  # Importação das novas classes
 from controls import handle_movement  # Importação da função de controle
+from game_objects import enemy
 
 # Inicialização do Pygame
 pygame.init()
@@ -79,6 +80,8 @@ while running:
 
     # Desenhar o personagem
     pygame.draw.rect(screen, (0, 128, 0), character_rect)
+
+    enemy.update(screen, SCREEN_WIDTH, SCREEN_HEIGHT, pygame.Vector2(character_x, character_y))
 
     pygame.display.flip()
     clock.tick(30)
