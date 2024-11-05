@@ -1,29 +1,80 @@
-import sys
-import os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import pygame
-import controls
-from config import Config
 
-class Boy():
-    def __init__(self, size, maxSpeed):
-        self.size = size
-        self.maxSpeed = maxSpeed
-        self.position = pygame.Vector2(Config.SCREEN_WIDTH // 2 - self.size // 2, Config.SCREEN_HEIGHT - self.size)
-        self.rect = pygame.Rect(self.position.x, self.position.y , self.size, self.size)
-        self.color = (0, 128, 0)
+class Character:
+    """
+    Represents a base character in the game, handling position, movement speed, and stamina.
 
-    def update(self):
-        self.position = controls.handle_movement(self.position,self.maxSpeed)
-        self.rect = pygame.Rect(self.position.x, self.position.y , self.size, self.size)
+    Attributes:
+        rect (pygame.Rect): Defines the position and size of the character.
+        speed (int): The movement speed of the character.
+        max_stamina (int): The maximum stamina value for the character.
+        stamina (int): The current stamina value, initialized below maximum for testing.
+    """
 
-    def render(self,screen):
-        pygame.draw.rect(screen, self.color, self.rect)
+    def __init__(self, x, y, speed, max_stamina):
+        """
+        Initializes the character with position, speed, and stamina values.
 
+        Args:
+            x (int): The x-coordinate of the top-left corner of the character.
+            y (int): The y-coordinate of the top-left corner of the character.
+            speed (int): The movement speed of the character.
+            max_stamina (int): The maximum stamina value for the character.
+        """
+        # Define the character's position and size
+        self.rect = pygame.Rect(x, y, 50, 50)
+        # Initialize speed and stamina values
+        self.speed = speed
+        self.max_stamina = max_stamina
+        self.stamina = max_stamina - 60  # Initialize stamina for testing purposes
 
-def update(screen, boy):
-    boy.update()
-    boy.render(screen)
+    def draw(self, surface):
+        """
+        Draws the character on the specified surface.
 
-    
+        Args:
+            surface (pygame.Surface): The surface to draw the character onto.
+        """
+        surface.blit(self.image, self.rect)
 
+class Boy(Character):
+    """
+    Represents the 'Boy' character with unique image, speed, and stamina values.
+    Inherits from Character.
+    """
+
+    def __init__(self, x, y):
+        """
+        Initializes the 'Boy' character with a specific image, speed, and max stamina.
+
+        Args:
+            x (int): The x-coordinate of the top-left corner of the boy character.
+            y (int): The y-coordinate of the top-left corner of the boy character.
+        """
+        super().__init__(x, y, speed=2, max_stamina=100)
+        # Load and set the character image
+        self.image = pygame.transform.scale(
+            pygame.image.load("sprites/characters/boy.png").convert_alpha(),
+            (50, 50)
+        )
+
+class Girl(Character):
+    """
+    Represents the 'Girl' character with unique image, speed, and stamina values.
+    Inherits from Character.
+    """
+
+    def __init__(self, x, y):
+        """
+        Initializes the 'Girl' character with a specific image, speed, and max stamina.
+
+        Args:
+            x (int): The x-coordinate of the top-left corner of the girl character.
+            y (int): The y-coordinate of the top-left corner of the girl character.
+        """
+        super().__init__(x, y, speed=3, max_stamina=80)
+        # Load and set the character image
+        self.image = pygame.transform.scale(
+            pygame.image.load("sprites/characters/girl.png").convert_alpha(),
+            (50, 50)
+        )

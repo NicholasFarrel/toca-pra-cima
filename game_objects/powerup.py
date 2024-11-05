@@ -1,44 +1,43 @@
-import sys
-import os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from config import Config
 import pygame
-import random
 
-# Classe para os sacos de magnésio
 class Magnesio(pygame.sprite.Sprite):
-    def __init__(self, screen_width, screen_height):
+    """
+    Represents a magnesium power-up in the game, which restores stamina to the character upon collection.
+
+    Attributes:
+        image (pygame.Surface): The image representing the magnesium item.
+        rect (pygame.Rect): The rectangular area of the item, used for positioning and collision.
+        stamina_boost (int): The amount of stamina restored to the character when collected.
+    """
+
+    def __init__(self, x, y):
+        """
+        Initializes the magnesium power-up with its image, position, and stamina boost value.
+
+        Args:
+            x (int): The x-coordinate for the top-left corner of the magnesium item.
+            y (int): The y-coordinate for the top-left corner of the magnesium item.
+        """
         super().__init__()
-        self.image = pygame.Surface((20, 20))
-        self.image.fill((255, 255, 255))  # Cor branca para o saco de magnésio
-        self.rect = self.image.get_rect()
-        self.screen_width = screen_width
-        self.screen_height = screen_height
-        self.reset_position()
+        
+        # Load and scale the magnesium image
+        self.image = pygame.transform.scale(
+            pygame.image.load("sprites/items/magnesio.png").convert_alpha(),
+            (20, 20)
+        )
+        # Set the initial position of the item
+        self.rect = self.image.get_rect(topleft=(x, y))
+        
+        # Stamina boost value given by the item
+        self.stamina_boost = 20
 
-    def reset_position(self):
-        self.rect.x = random.randint(0, self.screen_width - self.rect.width)
-        self.rect.y = random.randint(0, self.screen_height - self.rect.height)
+    def apply_effect(self, character):
+        """
+        Applies the stamina boost effect to the character.
 
-# Classe para a barra de magnésio
-class MagnesioBar:
-    def __init__(self, max_magnesio):
-        self.max_magnesio = max_magnesio
-        self.current_magnesio = 0
-        self.width = 200
-        self.height = 20
-        self.x = 10
-        self.y = 10
-
-    def increase_magnesio(self):
-        if self.current_magnesio < self.max_magnesio:
-            self.current_magnesio += 1
-
-    def draw(self, surface):
-        # Barra de fundo (vazia)
-        pygame.draw.rect(surface, (255, 0, 0), (self.x, self.y, self.width, self.height))
-        # Barra preenchida com magnésio coletado
-        filled_width = (self.current_magnesio / self.max_magnesio) * self.width
-        pygame.draw.rect(surface, (0, 255, 0), (self.x, self.y, filled_width, self.height))
-
-
+        Args:
+            character (Character): The character object whose stamina is to be restored.
+        
+        The character's stamina is increased by `stamina_boost` but does not exceed `max_stamina`.
+        """
+        character.stamina = min(character.stamina + self.stamina_boost, character.max_stamina)
