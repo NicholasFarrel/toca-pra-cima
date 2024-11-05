@@ -1,33 +1,36 @@
 import pygame
-import random
+import random  # posicao = pygame.Vector2(x,y)
 
-class Cloud(pygame.sprite.Sprite):
+class Cloud:
     def __init__(self, screen_height):
-       super().__init__()
-       self.image = pygame.Surface((40, 30))
-       self.color = (255, 255, 255)
-       self.image.fill((255, 255, 255))  
-       self.rect = self.image.get_rect()
-       # Velocidade 
-       self.speed_x = 10
-       # Posição
-       self.rect.x = 0
-       self.rect.y = random.randint(100, screen_height)
-       
+        # Posição
+        self.position = pygame.Vector2(0-140, random.randint(5, screen_height-100))
+        # Velocidade 
+        self.speed = random.randint(2, 5)
+        
     def render(self, screen):
-        pygame.draw.rect(screen, self.color, (self.rect.x, self.rect.y, 40, 30))
+        pygame.draw.rect(screen, (255, 255, 255), (*self.position, 140, 60))
        
     def move(self):
-       self.rect.x += self.speed_x
+        self.position.x += self.speed
+        
+    def check_screen(self, screen_width):
+        if self.position.x > screen_width:
+            return True
+        else:
+            return False
        
 clouds = []
        
-def update(screen_height, screen):
-    if len(clouds) < 3:
+def update(screen_width, screen_height, screen):
+    if len(clouds) < 80:
         c = Cloud(screen_height)
         clouds.append(c)
         
     for c in clouds:
         c.move()
         c.render(screen)
+        if c.check_screen(screen_width):
+            clouds.remove(c)
+        
     
