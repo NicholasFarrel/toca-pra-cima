@@ -2,6 +2,7 @@ import pygame
 from scenes.game_scene import GameScene
 from game_objects.player import Boy, Girl
 from game_objects.powerup import Magnesio
+from game_objects import birds
 from mechanics.stamina import StaminaBar
 
 # Screen settings
@@ -11,6 +12,7 @@ pygame.display.set_caption("Toca pra Cima")
 
 # Instantiate the character (Boy or Girl in this case)
 character = Girl(SCREEN_WIDTH // 2, SCREEN_HEIGHT - 100)
+
 
 # Create magnesium power-ups at fixed positions and add them to the group
 magnesio_positions = [(200, 150), (400, 300), (600, 450)]
@@ -22,6 +24,9 @@ for pos in magnesio_positions:
 # Instantiate the game scene
 game_scene = GameScene(screen, character, magnesio_group)
 
+# Initialize the birds module
+birds.initialize(character.speed)
+
 # Instantiate the stamina bar
 stamina_bar = StaminaBar(x=10, y=10, width=200, height=20, max_stamina=character.max_stamina)
 
@@ -31,7 +36,7 @@ running = True
 while running:
     # Movement flags initialized to False at the start of each frame
     move_up = move_down = move_left = move_right = False
-
+    
     # Event handling loop
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -63,7 +68,7 @@ while running:
     game_scene.draw()
     character.draw(screen)
     stamina_bar.draw(screen)  # Draw the stamina bar on top of the scene
-
+    birds.update(screen, game_scene.bg_y_offset, pygame.math.Vector2(character.rect.center))
     pygame.display.flip()  # Refresh the display
     clock.tick(60)  # Keep the game running at 60 FPS
 
