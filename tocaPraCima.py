@@ -1,89 +1,81 @@
 import pygame
-import sys
-from resources import Magnesio, MagnesioBar  # Importação das novas classes
-from controls import handle_movement  # Importação da função de controle
-#from obstacles import Cloud  # Importação dos obstáculos 
+
+from scenes.game_scene import GameScene
+from game_objects.player import Boy, Girl
+from game_objects.powerup import Magnesio
 from game_objects import obstacles
+from mechanics.stamina import StaminaBar
 
-# Inicialização do Pygame
-pygame.init()
 
-# Configurações da tela
+# Screen settings
 SCREEN_WIDTH, SCREEN_HEIGHT = 800, 600
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Toca pra Cima")
 
-# Carregar a textura do cenário
-background_texture = pygame.image.load("sprites/mountain_texture.jpg").convert()
-texture_width, texture_height = background_texture.get_size()
+# Instantiate the character (Boy or Girl in this case)
+character = Girl(SCREEN_WIDTH // 2, SCREEN_HEIGHT - 100)
 
-# Configurações do personagem
-character_size = 50
-character_x = SCREEN_WIDTH // 2 - character_size // 2
-character_y = SCREEN_HEIGHT - character_size
-character_speed = 5
+# Initialize clouds 
+obstacles.initialize(character.speed)
 
-# Configurações do cenário
-background_y = 0
-background_speed = 2  # velocidade do movimento do cenário
-
-# Lista de posições estratégicas para os sacos de magnésio
-strategic_positions = [
-    (200, -100), (400, -300), (100, -500), (700, -700), (300, -900),
-    (500, -1100), (150, -1300), (650, -1500), (250, -1700), (550, -1900)
-]
-
-# Criar grupo de sprites e instância da barra de magnésio
+# Create magnesium power-ups at fixed positions and add them to the group
+magnesio_positions = [(200, 150), (400, 300), (600, 450)]
 magnesio_group = pygame.sprite.Group()
-for pos in strategic_positions:
-    magnesio = Magnesio(SCREEN_WIDTH, SCREEN_HEIGHT)
-    magnesio.rect.x, magnesio.rect.y = pos  # Posiciona em locais estratégicos
+for pos in magnesio_positions:
+    magnesio = Magnesio(*pos)
     magnesio_group.add(magnesio)
 
-magnesio_bar = MagnesioBar(max_magnesio=10)  # Barra de magnésio com capacidade máxima de 10 unidades
+# Instantiate the game scene
+game_scene = GameScene(screen, character, magnesio_group)
 
-# Loop principal do jogo
+# Instantiate the stamina bar
+stamina_bar = StaminaBar(x=10, y=10, width=200, height=20, max_stamina=character.max_stamina)
+
+# Main game loop
 clock = pygame.time.Clock()
 running = True
 while running:
+    # Movement flags initialized to False at the start of each frame
+    move_up = move_down = move_left = move_right = False
+
+    # Event handling loop
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            pygame.quit()
-            sys.exit()
+            running = False  # Exit the game loop
 
-    # Processar a movimentação do personagem usando controles externos
+    # Capture movement inputs
     keys = pygame.key.get_pressed()
-    character_x, character_y = handle_movement(keys, character_x, character_y, character_speed, SCREEN_WIDTH, SCREEN_HEIGHT)
+    if keys[pygame.K_w] or keys[pygame.K_UP]:
+        move_up = True
+    if keys[pygame.K_s] or keys[pygame.K_DOWN]:
+        move_down = True
+    if keys[pygame.K_a] or keys[pygame.K_LEFT]:
+        move_left = True
+    if keys[pygame.K_d] or keys[pygame.K_RIGHT]:
+        move_right = True
 
-    # Atualizar posição do cenário e dos sacos de magnésio
-    if keys[pygame.K_w] or keys[pygame.K_UP]:  # Move o cenário e os sacos de magnésio para baixo
-        if character_y <= SCREEN_HEIGHT * 0.2:
-            background_y += background_speed
-            for magnesio in magnesio_group:
-                magnesio.rect.y += background_speed  # Mover o magnésio conforme o fundo se move
+    # Update the game scene based on movement inputs
+    game_scene.update(move_up, move_down, move_left, move_right)
 
-    # Verificar colisão do personagem com os sacos de magnésio
-    character_rect = pygame.Rect(character_x, character_y, character_size, character_size)
-    for magnesio in magnesio_group:
-        if character_rect.colliderect(magnesio.rect):
-            magnesio_bar.increase_magnesio()
-            magnesio_group.remove(magnesio)  # Remover o saco coletado
+    # Check collisions with magnesium power-ups and apply stamina effect
+    collected_magnesios = pygame.sprite.spritecollide(character, magnesio_group, True)
+    for magnesio in collected_magnesios:
+        magnesio.apply_effect(character)  # Restore the character's stamina
 
-    # Desenhar o fundo e o personagem
-    for y in range(-texture_height, SCREEN_HEIGHT, texture_height):
-        screen.blit(background_texture, (0, y + background_y % texture_height))
+    # Update the stamina bar
+    stamina_bar.update(character.stamina)
 
-    # Desenhar os sacos de magnésio
-    magnesio_group.draw(screen)
+    # Draw the scene, character, and stamina bar
+    game_scene.draw()
+    character.draw(screen)
+    stamina_bar.draw(screen)  # Draw the stamina bar on top of the scene
 
-    # Desenhar a barra de magnésio
-    magnesio_bar.draw(screen)
+    obstacles.update(SCREEN_WIDTH, SCREEN_HEIGHT, screen, game_scene.bg_y_offset)
 
-    # Desenhar o personagem
-    pygame.draw.rect(screen, (0, 128, 0), character_rect)
-    
-    obstacles.update(SCREEN_WIDTH, SCREEN_HEIGHT, screen)
+    pygame.display.flip()  # Refresh the display
+    clock.tick(60)  # Keep the game running at 60 FPS
 
-    pygame.display.flip()
-    clock.tick(30)
-    
+
+
+pygame.quit()
+
