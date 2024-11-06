@@ -82,7 +82,7 @@ while running:
     # Desenhar o personagem
     pygame.draw.rect(screen, (0, 128, 0), character_rect)
     
-    obstacles.update(SCREEN_HEIGHT, screen)
+    obstacles.update(SCREEN_WIDTH, SCREEN_HEIGHT, screen)
 
     pygame.display.flip()
     clock.tick(30)

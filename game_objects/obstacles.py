@@ -27,10 +27,10 @@ def update(screen_width, screen_height, screen):
         c = Cloud(screen_height)
         clouds.append(c)
         
+    clouds[:] = [c for c in clouds if not c.check_screen(screen_width)]
+        
     for c in clouds:
         c.move()
         c.render(screen)
-        if c.check_screen(screen_width):
-            clouds.remove(c)
         
     
