@@ -33,6 +33,10 @@ class Cloud:
        
 clouds = []
        
+def initialize(speed):
+    global playerSpeed
+    playerSpeed = speed
+
 def update(screen_width, screen_height, screen, bg_y_offset):
     if len(clouds) < 80:
         c = Cloud(screen_height)
