@@ -76,11 +76,12 @@ class Vulture(Bird):
             The size of the vulture (default is 30).
         """
         self.dashTime = 0
+        self.damageTime = 0
         super().__init__(position, health, size, maxVelocitie, color)
         self.damage = damage  
 
 
-    def move(self, player_position, dy):
+    def move(self, playerPosition, dy):
         """
         Update the vulture's position to move toward the player.
 
@@ -89,7 +90,7 @@ class Vulture(Bird):
         player_position : pygame.Vector2
             The current position of the player.
         """
-        dif = player_position - self.position
+        dif = playerPosition - self.position
         distance = dif.length()
         # Adjust the velocity slightly toward the player's position
 
@@ -106,10 +107,19 @@ class Vulture(Bird):
         if (self.dashTime > 20):
             self.velocity = self.velocity.normalize() * self.maxVelocity
 
-        self.dash(player_position, dif)
+        self.dash(playerPosition, dif)
         self.rect = pygame.Rect(self.position.x, self.position.y, self.size, self.size)
+        self.damageTime += 1
+        
 
-    def dash(self, player_position, dif):
+    
+    def dealDamage(self, character):
+        if(self.damageTime > 60):
+            character.stamina -= self.damage
+            self.damageTime = 0
+
+
+    def dash(self, playerPosition, dif):
         """
         Perform a dash attack when the player is within a specific range.
 
@@ -120,7 +130,7 @@ class Vulture(Bird):
         dif : pygame.Vector2
             The difference vector between the vulture and the player.
         """
-        if (player_position.y - self.position.y < 200 and player_position.y > self.position.y and abs(player_position.x - self.position.x) < 100):
+        if (playerPosition.y - self.position.y < 200 and playerPosition.y > self.position.y and abs(playerPosition.x - self.position.x) < 100):
             # Quick movement towards the player
             self.dashTime += 1
             self.velocity.y = dif.y * 0.1
@@ -159,6 +169,7 @@ class Poop:
         self.color = color
         self.size = size
         self.rect = pygame.Rect(*self.position, self.size, self.size)
+        self.dissapear = False
 
 
     def move(self, dy):
@@ -169,6 +180,12 @@ class Poop:
 
         self.rect = pygame.Rect(*self.position, self.size, self.size)
 
+    
+    def dealDamage(self, character):
+        character.stamina -= self.damage
+        print(character.stamina)
+        self.dissapear = True
+        
 
     def render(self, screen):
         pygame.draw.rect(screen, self.color, self.rect)
@@ -226,7 +243,7 @@ def initialize(speed):
 
 
 
-def update(screen, bg_y_offset, player_position):
+def update(screen, bg_y_offset, character):
     """
     Update the vulture instances, move them, and render them on the screen.
 
@@ -243,16 +260,25 @@ def update(screen, bg_y_offset, player_position):
     """
     global backgroundY
 
+    playerPosition =  pygame.math.Vector2(character.rect.center)
+    playerRect = character.rect
+
     dy = bg_y_offset - backgroundY
     backgroundY = bg_y_offset
 
     # Move and render each vulture
     for v in vultures:
-        v.move(player_position, dy)
+        v.move(playerPosition, dy)
+        if v.rect.colliderect(playerRect):
+            v.dealDamage(character)
         v.render(screen)
 
     for p in pigeons:
         p.move(dy)
         p.render(screen)
+
+        p.poops[:] = [poop for poop in p.poops if not poop.dissapear]
         for poop in p.poops:
+            if poop.rect.colliderect(playerRect):
+                poop.dealDamage(character)
             poop.render(screen)

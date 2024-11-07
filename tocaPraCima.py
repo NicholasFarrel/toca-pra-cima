@@ -62,13 +62,15 @@ while running:
         magnesio.apply_effect(character)  # Restore the character's stamina
 
     # Update the stamina bar
+    
     stamina_bar.update(character.stamina)
+
 
     # Draw the scene, character, and stamina bar
     game_scene.draw()
     character.draw(screen)
     stamina_bar.draw(screen)  # Draw the stamina bar on top of the scene
-    birds.update(screen, game_scene.bg_y_offset, pygame.math.Vector2(character.rect.center))
+    birds.update(screen, game_scene.bg_y_offset, character)
     pygame.display.flip()  # Refresh the display
     clock.tick(60)  # Keep the game running at 60 FPS
 

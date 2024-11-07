@@ -13,7 +13,7 @@ class Magnesio(pygame.sprite.Sprite):
     def __init__(self, x, y):
         """
         Initializes the magnesium power-up with its image, position, and stamina boost value.
-
+    
         Args:
             x (int): The x-coordinate for the top-left corner of the magnesium item.
             y (int): The y-coordinate for the top-left corner of the magnesium item.
