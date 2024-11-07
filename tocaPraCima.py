@@ -25,7 +25,7 @@ for pos in magnesio_positions:
 game_scene = GameScene(screen, character, magnesio_group)
 
 # Initialize the birds module
-birds.initialize(character.speed)
+birds.initialize(character)
 
 # Instantiate the stamina bar
 stamina_bar = StaminaBar(x=10, y=10, width=200, height=20, max_stamina=character.max_stamina)
