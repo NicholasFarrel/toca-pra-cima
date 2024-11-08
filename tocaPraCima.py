@@ -4,6 +4,7 @@ from game_objects.player import Boy, Girl
 from game_objects.powerup import Magnesio
 from mechanics.stamina import StaminaBar
 from game_objects.insects import BeeSwarm
+from mechanics.defense_patterns import BeeDefense  # Import BeeDefense
 
 # Screen settings
 SCREEN_WIDTH, SCREEN_HEIGHT = 800, 600
@@ -29,13 +30,13 @@ stamina_bar = StaminaBar(x=10, y=10, width=200, height=20, max_stamina=character
 # Instantiate the bee swarm
 bee_swarm = BeeSwarm(SCREEN_WIDTH, SCREEN_HEIGHT)
 
+# Instantiate the bee defense mechanic
+bee_defense = BeeDefense()
+
 # Main game loop
 clock = pygame.time.Clock()
 running = True
 while running:
-    # Movement flags initialized to False at the start of each frame
-    move_up = move_down = move_left = move_right = False
-
     # Event handling loop
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -43,24 +44,30 @@ while running:
 
     # Capture movement inputs
     keys = pygame.key.get_pressed()
-    if keys[pygame.K_w] or keys[pygame.K_UP]:
-        move_up = True
-    if keys[pygame.K_s] or keys[pygame.K_DOWN]:
-        move_down = True
-    if keys[pygame.K_a] or keys[pygame.K_LEFT]:
-        move_left = True
-    if keys[pygame.K_d] or keys[pygame.K_RIGHT]:
-        move_right = True
+    player_position = pygame.Vector2(character.rect.center)
 
-    # Check if space is pressed to scare the bees
-    scaring_bees = keys[pygame.K_SPACE]
+    # Update the bee defense mechanic
+    bee_defense.update(player_position, bee_swarm.swarm_center, keys)
+
+    # Determine if movement should be blocked due to bee proximity
+    if not bee_defense.is_movement_blocked(player_position, bee_swarm.swarm_center):
+        # Normal movement input if bees are not blocking
+        move_up = keys[pygame.K_w] or keys[pygame.K_UP]
+        move_down = keys[pygame.K_s] or keys[pygame.K_DOWN]
+        move_left = keys[pygame.K_a] or keys[pygame.K_LEFT]
+        move_right = keys[pygame.K_d] or keys[pygame.K_RIGHT]
+    else:
+        # Block movement if bees are too close and haven't been scared away
+        move_up = move_down = move_left = move_right = False
 
     # Update the game scene based on movement inputs
     game_scene.update(move_up, move_down, move_left, move_right)
 
-    # Update the bee swarm position and scare state
-    player_position = pygame.Vector2(character.rect.center)  # Use the character's center position
-    bee_swarm.update(player_position, scaring_bees)
+    # Update the bee swarm position and scare state, only if scaring_bees is True
+    if bee_defense.scaring_bees:
+        bee_swarm.update(player_position, True)  # Bees should move away
+    else:
+        bee_swarm.update(player_position, False)  # Normal bee behavior
 
     # Check collisions with magnesium power-ups and apply stamina effect
     collected_magnesios = pygame.sprite.spritecollide(character, magnesio_group, True)
@@ -81,4 +88,5 @@ while running:
     pygame.display.flip()  # Refresh the display
     clock.tick(60)  # Keep the game running at 60 FPS
 
+# Quit pygame and exit
 pygame.quit()
