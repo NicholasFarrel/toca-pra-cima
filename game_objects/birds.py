@@ -2,16 +2,35 @@ import pygame
 import random
 import math
 
+
 backgroundY = 0
 playerSpeed = 0
 
-vultureImage = pygame.image.load('sprites/enemies/vulture.jpg')
-poopImage = pygame.image.load('sprites/enemies/vulture.jpg')
-pigeonImage = pygame.image.load('sprites/enemies/vulture.jpg')
+
+def loadImage(imagePath, dimesion):
+    image = pygame.image.load(imagePath).convert_alpha()
+    image = pygame.transform.scale(image,dimesion)
+
+    return image
+
+
+def createAnimation(entity, rotation = 0):
+    image = pygame.image.load(entity.imagePath)
+    frames = [
+        pygame.transform.scale(    
+            image.subsurface(i * entity.original_frame_dimension[0], 0, *entity.original_frame_dimension),
+            entity.scaled_frame_dimension
+            )
+        for i in range(8)
+    ]
+    return frames
+
+
+
 
 
 class Bird():
-    def __init__(self, position, health, size, maxVelocitie, color, image):
+    def __init__(self, position, health, size, maxVelocitie, color, imagePath, scale,original_frame_dimension, scaled_frame_dimension ):
         self.position = pygame.Vector2(position[0], position[1])
         self.health = health
         self.size = size
@@ -20,12 +39,17 @@ class Bird():
         self.color = color
         self.velocity = pygame.Vector2(0,0)
         self.acceleration = pygame.Vector2(0,0)
-        self.image = pygame.transform.scale(image, (size,size))
         self.angle = 0
-        self.rotatedImage = pygame.transform.rotate(self.image, -self.angle)
+        self.original_frame_dimension = original_frame_dimension
+        self.scaled_frame_dimension = scaled_frame_dimension
+        self.scaled_frame_dimension = (self.scale * 16, self.scale*16)
+        self.frames = createAnimation(self)
+        self.frame = 0
 
-    def render(self, screen):
-        screen.blit(self.rotatedImage, self.rect.center)
+
+    def drawAnimation(self, screen):
+        screen.blit(self.frames[math.floor(self.frame % len(self.frames))], self.rect.center)
+        self.frame += 1/5 * self.maxVelocity/10
 
 
 class Vulture(Bird):
@@ -67,8 +91,7 @@ class Vulture(Bird):
         Draws the vulture on the given screen surface.
     """
 
-
-    def __init__(self, position, image = vultureImage, maxVelocitie = 10, health=100, damage=10, size=40, color = (255,0,0)):
+    def __init__(self, position, maxVelocity = 10, health=100, damage=10, size=40, color = (255,0,0)):
         """
         Initialize a new vulture with random position and specified attributes.
 
@@ -85,9 +108,14 @@ class Vulture(Bird):
         size : int, optional
             The size of the vulture (default is 30).
         """
+        self.imagePath = 'sprites/enemies/birdFlying.png'
+        self.scale = 5
+        self.original_frame_dimension = (160, 160)
+        self.scaled_frame_dimension = (self.scale * 16, self.scale*16)
         self.dashTime = 0
         self.damageTime = 0
-        super().__init__(position, health, size, maxVelocitie, color, image)
+        super().__init__(position, health, size, maxVelocity, color, self.imagePath, self.scale,self.original_frame_dimension, self.scaled_frame_dimension)
+       
         self.damage = damage  
 
 
@@ -122,7 +150,7 @@ class Vulture(Bird):
         self.damageTime += 1
 
         self.angle = math.atan2(dif.x, dif.y)*180/3.1415926535897932
-        self.rotatedImage = pygame.transform.rotate(self.image, self.angle)
+        self.rotatedImage = pygame.transform.rotate(self.frames[math.floor(self.frame % len(self.frames))], self.angle)
         
     
     def dealDamage(self, character):
@@ -171,12 +199,18 @@ class Vulture(Bird):
         return False
 
 
+    def render(self,screen):
+        screen.blit(self.rotatedImage, self.rect.center)
+        self.frame += 1/5 * self.velocity.length()/10
+
+
 class Poop:
-    def __init__(self, position, velocity,image = poopImage, damage= 10, color = (0,255,0), size = 13, ):
+    def __init__(self, position, velocity, damage= 10, color = (0,255,0), size = 13, ):
+        self.imagePath = 'sprites/enemies/pigeon.png'
         self.position = position
         self.velocity = velocity
         self.damage = 10
-        self.image = pygame.transform.scale(image, (size,size))
+        self.image = loadImage(self.imagePath, (size,size))
         self.color = color
         self.size = size
         self.rect = pygame.Rect(*self.position, self.size, self.size)
@@ -204,9 +238,14 @@ class Poop:
 
 
 class Pigeon(Bird):
-    def __init__(self, position, image = pigeonImage,health = 10, size = 10, maxVelocity = 5, color = (0,0,255)):
-        super().__init__(position, health, size, maxVelocity, color, image)
-        self.velocity = pygame.Vector2(random.randint(1,maxVelocity), 0)
+    def __init__(self, position,health = 10, size = 50, maxVelocity = 5, color = (0,0,255)):
+        self.imagePath = 'sprites/enemies/birdFlying.png'
+        self.scale = 5
+        self.original_frame_dimension = (160, 160)
+        self.scaled_frame_dimension = (self.scale * 16, self.scale*16)
+        super().__init__(position, health, size, maxVelocity, color, self.imagePath, self.scale,self.original_frame_dimension, self.scaled_frame_dimension)
+        self.image = pygame.image.load(self.imagePath)
+        self.velocity = pygame.Vector2(random.randint(2,maxVelocity), 0)
         self.poopTime = random.randint(30,100)
         self.time = 0
         self.poops = []
@@ -219,6 +258,7 @@ class Pigeon(Bird):
         self.rect = pygame.Rect(*self.position, self.size, self.size)
         self.poop(dy)
 
+
     def poop(self,dy):
         if (self.time > self.poopTime):
             p = Poop(self.position.copy(), self.velocity.copy())
@@ -229,6 +269,7 @@ class Pigeon(Bird):
         
         for poop in self.poops:
             poop.move(dy)
+
 
 
 # List to store vulture instances
@@ -282,7 +323,7 @@ def update(screen, bg_y_offset, character):
 
     for p in pigeons:
         p.move(dy)
-        p.render(screen)
+        p.drawAnimation(screen)
 
         p.poops[:] = [poop for poop in p.poops if not poop.dissapear]
         for poop in p.poops:
