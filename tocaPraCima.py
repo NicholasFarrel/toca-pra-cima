@@ -70,7 +70,7 @@ while running:
     character.draw(screen)
     stamina_bar.draw(screen)  # Draw the stamina bar on top of the scene
 
-    obstacles.update(SCREEN_WIDTH, SCREEN_HEIGHT, screen, game_scene.bg_y_offset)
+    obstacles.update(SCREEN_WIDTH, screen, game_scene.bg_y_offset)
 
     pygame.display.flip()  # Refresh the display
     clock.tick(60)  # Keep the game running at 60 FPS
