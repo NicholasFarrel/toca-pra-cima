@@ -1,4 +1,18 @@
 import pygame
+import math
+
+
+def createAnimation(entity, rotation = 0):
+    image = pygame.image.load(entity.imagePath)
+    frames = [
+        pygame.transform.scale(    
+            image.subsurface(i * entity.original_frame_dimension[0], 0, *entity.original_frame_dimension),
+            entity.scaled_frame_dimension
+            )
+        for i in range(2)
+    ]
+    return frames
+
 
 class Character:
     """
@@ -10,6 +24,7 @@ class Character:
         max_stamina (int): The maximum stamina value for the character.
         stamina (int): The current stamina value, initialized below maximum for testing.
     """
+
 
     def __init__(self, x, y, speed, max_stamina):
         """
@@ -27,6 +42,13 @@ class Character:
         self.speed = speed
         self.max_stamina = max_stamina
         self.stamina = max_stamina - 60  # Initialize stamina for testing purposes
+        self.original_frame_dimension = (500,500)
+        self.scaled_frame_dimension = (200,200)
+        self.imagePath = 'sprites/characters/char.png'
+        self.frames = createAnimation(self)
+        self.frame = 0
+        self.time = 0
+
 
     def draw(self, surface):
         """
@@ -36,6 +58,15 @@ class Character:
             surface (pygame.Surface): The surface to draw the character onto.
         """
         surface.blit(self.image, self.rect)
+
+
+    def drawAnimation(self, screen):
+        self.time += 1
+        keys = pygame.key.get_pressed()
+        if self.time % 30 == 0 and keys[pygame.K_w]:
+            self.frame += 1
+        screen.blit(self.frames[math.floor(self.frame % len(self.frames))], self.rect.center)
+        
 
 class Boy(Character):
     """

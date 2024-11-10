@@ -26,9 +26,6 @@ def createAnimation(entity, rotation = 0):
     return frames
 
 
-
-
-
 class Bird():
     def __init__(self, position, health, size, maxVelocitie, color, imagePath, scale,original_frame_dimension, scaled_frame_dimension ):
         self.position = pygame.Vector2(position[0], position[1])
@@ -49,7 +46,7 @@ class Bird():
 
     def drawAnimation(self, screen):
         screen.blit(self.frames[math.floor(self.frame % len(self.frames))], self.rect.center)
-        self.frame += 1/5 * self.maxVelocity/10
+        self.frame += 1/5 * self.maxVelocity/10 
 
 
 class Vulture(Bird):
@@ -129,6 +126,13 @@ class Vulture(Bird):
             The current position of the player.
         """
         dif = playerPosition - self.position
+
+        if dif.x < 0 :
+            self.imagePath =  'sprites/enemies/left.png'
+        else:
+            self.imagePath = 'sprites/enemies/birdFlying.png'
+        self.frames = createAnimation(self)
+
         distance = dif.length()
         # Adjust the velocity slightly toward the player's position
 
@@ -150,9 +154,19 @@ class Vulture(Bird):
         self.damageTime += 1
 
         self.angle = math.atan2(dif.x, dif.y)*180/3.1415926535897932
+        self.orientation(distance)
+
+
+    def orientation (self, distance):
+        if distance > 20 and self :    
+            if self.angle < 0:
+                self.angle = - self.angle % 30
+            else:
+                self.angle = self.angle % 30
         self.rotatedImage = pygame.transform.rotate(self.frames[math.floor(self.frame % len(self.frames))], self.angle)
         
-    
+
+
     def dealDamage(self, character):
         if(self.damageTime > 60):
             character.stamina -= self.damage
@@ -174,6 +188,7 @@ class Vulture(Bird):
             # Quick movement towards the player
             self.dashTime += 1
             self.velocity.y = dif.y * 0.1
+            self.velocity.x = dif.x * 0.1
         else:
             self.dashTime = 0
 

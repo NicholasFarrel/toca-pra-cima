@@ -68,7 +68,7 @@ while running:
 
     # Draw the scene, character, and stamina bar
     game_scene.draw()
-    character.draw(screen)
+    character.drawAnimation(screen)
     stamina_bar.draw(screen)  # Draw the stamina bar on top of the scene
     birds.update(screen, game_scene.bg_y_offset, character)
     pygame.display.flip()  # Refresh the display
