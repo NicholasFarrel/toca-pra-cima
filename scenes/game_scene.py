@@ -34,12 +34,20 @@ class GameScene:
             move_left (bool): True if moving left input is active.
             move_right (bool): True if moving right input is active.
         """
+
+        keys = pygame.key.get_pressed()
+        a = keys[pygame.K_a]
+        w = keys[pygame.K_w]
+        s = keys[pygame.K_s]
+        d = keys[pygame.K_d]
+
+
         # Vertical boundaries for the character to start moving the background
         upper_limit = self.screen.get_height() * 0.4
         lower_limit = self.screen.get_height() * 0.6
 
         # Background scrolls down if the character reaches the upper limit and 'move_up' is True
-        if move_up and self.character.rect.y <= upper_limit:
+        if move_up and self.character.rect.y <= upper_limit and not ( s or d or a):
             self.bg_y_offset += self.character.speed
             # Move all magnesium items with the background
             for magnesio in self.magnesio_group:
@@ -53,15 +61,15 @@ class GameScene:
                 magnesio.rect.y -= self.character.speed
 
         # If character is within the central range, it moves up and down without scrolling the background
-        elif move_up and self.character.rect.y > upper_limit:
+        elif move_up and self.character.rect.y > upper_limit and not ( s or d or a):
             self.character.rect.y -= self.character.speed
-        elif move_down and self.character.rect.y < lower_limit:
+        elif move_down and self.character.rect.y < lower_limit and not( d or w or a):
             self.character.rect.y += self.character.speed
 
         # Horizontal movement with boundaries on the screen edges
-        if move_left and self.character.rect.x > 0:
+        if move_left and self.character.rect.x > 0 and not( s or d or w):
             self.character.rect.x -= self.character.speed
-        if move_right and self.character.rect.x < self.screen.get_width() - self.character.rect.width:
+        if move_right and self.character.rect.x < self.screen.get_width() - self.character.rect.width and not( s or w or a):
             self.character.rect.x += self.character.speed
 
         # Limit background offset within the image's boundaries

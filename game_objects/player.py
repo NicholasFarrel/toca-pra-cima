@@ -3,15 +3,34 @@ import math
 
 
 def createAnimation(entity, rotation = 0):
-    image = pygame.image.load(entity.imagePath)
-    frames = [
+    climbingImage = pygame.image.load(entity.imagePath['climbingImage'])
+    movingLeftImage = pygame.image.load(entity.imagePath['movingLeftImage'])
+    movingRightImage = pygame.image.load(entity.imagePath['movingRightImage'])
+    
+    climbingFrames = [
         pygame.transform.scale(    
-            image.subsurface(i * entity.original_frame_dimension[0], 0, *entity.original_frame_dimension),
+            climbingImage.subsurface(i * entity.original_frame_dimension[0], 0, *entity.original_frame_dimension),
             entity.scaled_frame_dimension
-            )
-        for i in range(2)
+        )
+        for i in range(7)
     ]
-    return frames
+
+    movingLeftFrames = [
+        pygame.transform.scale(
+            movingLeftImage.subsurface(i * entity.original_frame_dimension[0], 0, *entity.original_frame_dimension),
+            entity.scaled_frame_dimension
+        )
+        for i in range(7)
+    ]
+    
+    movingRightFrames = [
+        pygame.transform.scale(
+            movingRightImage.subsurface(i * entity.original_frame_dimension[0], 0, *entity.original_frame_dimension),
+            entity.scaled_frame_dimension
+        )
+        for i in range(7)
+    ]
+    return climbingFrames, movingLeftFrames, movingRightFrames
 
 
 class Character:
@@ -44,8 +63,14 @@ class Character:
         self.stamina = max_stamina - 60  # Initialize stamina for testing purposes
         self.original_frame_dimension = (500,500)
         self.scaled_frame_dimension = (200,200)
-        self.imagePath = 'sprites/characters/char.png'
-        self.frames = createAnimation(self)
+        self.position = pygame.Vector2(x,y)
+        self.imagePath = {
+            'climbingImage' : 'sprites/characters/climbingImage.png',
+            'movingLeftImage' : 'sprites/characters/movingLeftImage.png',
+            'movingRightImage' : 'sprites/characters/movingRightImage.png'
+        }
+        #'sprites/characters/char.png'
+        self.climbingFrames, self.movingLeftFrames, self.movingRightFrames = createAnimation(self)
         self.frame = 0
         self.time = 0
 
@@ -63,10 +88,37 @@ class Character:
     def drawAnimation(self, screen):
         self.time += 1
         keys = pygame.key.get_pressed()
-        if self.time % 30 == 0 and keys[pygame.K_w]:
+        a = keys[pygame.K_a]
+        w = keys[pygame.K_w]
+        s = keys[pygame.K_s]
+        d = keys[pygame.K_d]
+
+        if self.time %  9 == 0 and w and not (a or d or s):
             self.frame += 1
-        screen.blit(self.frames[math.floor(self.frame % len(self.frames))], self.rect.center)
+           # screen.blit(self.climbingFrames[math.floor(self.frame % len(self.climbingFrames))], self.rect.center)
+            self.image = self.climbingFrames[math.floor(self.frame % len(self.climbingFrames))]
+
+        if self.time % 9 == 0 and a and not (w or s or d) :
+            self.frame += 1
+            #screen.blit(self.movingLeftFrames[math.floor(self.frame % len(self.movingLeftFrames))], self.rect.center) 
+            self.image = self.movingLeftFrames[math.floor(self.frame % len(self.movingLeftFrames))]
         
+        if self.time % 9 == 0 and d and not (w or a or s):
+            self.frame += 1
+            #screen.blit(self.movingLeftFrames[math.floor(self.frame % len(self.movingLeftFrames))], self.rect.center) 
+            self.image = self.movingRightFrames[math.floor(self.frame % len(self.movingLeftFrames))]
+        
+        if self.time % 9 == 0 and s and not (w or a or d) :
+            self.frame += 1
+            #screen.blit(self.movingLeftFrames[math.floor(self.frame % len(self.movingLeftFrames))], self.rect.center) 
+            self.image = self.climbingFrames[math.floor(self.frame % len(self.movingLeftFrames))]
+        
+
+
+
+        self.draw(screen)
+    
+    
 
 class Boy(Character):
     """
@@ -94,6 +146,7 @@ class Girl(Character):
     Represents the 'Girl' character with unique image, speed, and stamina values.
     Inherits from Character.
     """
+
 
     def __init__(self, x, y):
         """

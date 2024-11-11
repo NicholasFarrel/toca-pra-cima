@@ -4,6 +4,8 @@ from game_objects.player import Boy, Girl
 from game_objects.powerup import Magnesio
 from game_objects import birds
 from mechanics.stamina import StaminaBar
+from scenes.pause import Menu
+
 
 # Screen settings
 SCREEN_WIDTH, SCREEN_HEIGHT = 800, 600
@@ -23,6 +25,7 @@ for pos in magnesio_positions:
 
 # Instantiate the game scene
 game_scene = GameScene(screen, character, magnesio_group)
+menu = Menu
 
 # Initialize the birds module
 birds.initialize(character)
@@ -33,44 +36,63 @@ stamina_bar = StaminaBar(x=10, y=10, width=200, height=20, max_stamina=character
 # Main game loop
 clock = pygame.time.Clock()
 running = True
+paused = True
+time = 0
+
 while running:
-    # Movement flags initialized to False at the start of each frame
-    move_up = move_down = move_left = move_right = False
     
-    # Event handling loop
+    keys = pygame.key.get_pressed()
+    time += 1
+    if( keys[pygame.K_p] and time > 60):
+        if(paused):
+            paused = False
+        else :
+            paused = True
+        time = 0
+
+    if paused:
+        screen.fill((0,0,0))
+
+    else:
+        # Movement flags initialized to False at the start of each frame
+        move_up = move_down = move_left = move_right = False
+
+        
+        # Event handling loop
+
+        # Capture movement inputs
+        if keys[pygame.K_w] or keys[pygame.K_UP]:
+            move_up = True
+        if keys[pygame.K_s] or keys[pygame.K_DOWN]:
+            move_down = True
+        if keys[pygame.K_a] or keys[pygame.K_LEFT]:
+            move_left = True
+        if keys[pygame.K_d] or keys[pygame.K_RIGHT]:
+            move_right = True
+
+        # Update the game scene based on movement inputs
+        game_scene.update(move_up, move_down, move_left, move_right)
+
+        # Check collisions with magnesium power-ups and apply stamina effect
+        collected_magnesios = pygame.sprite.spritecollide(character, magnesio_group, True)
+        for magnesio in collected_magnesios:
+            magnesio.apply_effect(character)  # Restore the character's stamina
+
+        # Update the stamina bar
+        
+        stamina_bar.update(character.stamina)
+
+
+        # Draw the scene, character, and stamina bar
+        game_scene.draw()
+        character.drawAnimation(screen)
+        stamina_bar.draw(screen)  # Draw the stamina bar on top of the scene
+      
+        birds.update(screen, game_scene.bg_y_offset, character)
+    
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False  # Exit the game loop
-
-    # Capture movement inputs
-    keys = pygame.key.get_pressed()
-    if keys[pygame.K_w] or keys[pygame.K_UP]:
-        move_up = True
-    if keys[pygame.K_s] or keys[pygame.K_DOWN]:
-        move_down = True
-    if keys[pygame.K_a] or keys[pygame.K_LEFT]:
-        move_left = True
-    if keys[pygame.K_d] or keys[pygame.K_RIGHT]:
-        move_right = True
-
-    # Update the game scene based on movement inputs
-    game_scene.update(move_up, move_down, move_left, move_right)
-
-    # Check collisions with magnesium power-ups and apply stamina effect
-    collected_magnesios = pygame.sprite.spritecollide(character, magnesio_group, True)
-    for magnesio in collected_magnesios:
-        magnesio.apply_effect(character)  # Restore the character's stamina
-
-    # Update the stamina bar
-    
-    stamina_bar.update(character.stamina)
-
-
-    # Draw the scene, character, and stamina bar
-    game_scene.draw()
-    character.drawAnimation(screen)
-    stamina_bar.draw(screen)  # Draw the stamina bar on top of the scene
-    birds.update(screen, game_scene.bg_y_offset, character)
     pygame.display.flip()  # Refresh the display
     clock.tick(60)  # Keep the game running at 60 FPS
 
