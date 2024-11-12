@@ -76,7 +76,7 @@ class Character:
         self.image = self.climbingFrames[0]
 
 
-    def draw(self, surface):
+    def draw(self, surface):                      
         """
         Draws the character on the specified surface.
 
