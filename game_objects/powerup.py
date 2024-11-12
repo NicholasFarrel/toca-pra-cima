@@ -3,21 +3,10 @@ import pygame
 class Magnesio(pygame.sprite.Sprite):
     """
     Represents a magnesium power-up in the game, which restores stamina to the character upon collection.
-
-    Attributes:
-        image (pygame.Surface): The image representing the magnesium item.
-        rect (pygame.Rect): The rectangular area of the item, used for positioning and collision.
-        stamina_boost (int): The amount of stamina restored to the character when collected.
     """
+    magnesio_group = pygame.sprite.Group()
 
     def __init__(self, x, y):
-        """
-        Initializes the magnesium power-up with its image, position, and stamina boost value.
-    
-        Args:
-            x (int): The x-coordinate for the top-left corner of the magnesium item.
-            y (int): The y-coordinate for the top-left corner of the magnesium item.
-        """
         super().__init__()
         
         # Load and scale the magnesium image
@@ -31,13 +20,35 @@ class Magnesio(pygame.sprite.Sprite):
         # Stamina boost value given by the item
         self.stamina_boost = 20
 
+    @classmethod
+    def initialize(cls, positions):
+        """
+        Creates magnesio power-ups at the specified positions.
+        
+        Args:
+            positions (list): A list of (x, y) tuples for power-up locations.
+        """
+        for pos in positions:
+            magnesio = cls(*pos)
+            cls.magnesio_group.add(magnesio)
+
+    @classmethod
+    def update(cls, character):
+        """
+        Check for collisions and apply the stamina boost effect if collected.
+        
+        Args:
+            character: The character object to check for collisions with magnesio power-ups.
+        """
+        collected_magnesios = pygame.sprite.spritecollide(character, cls.magnesio_group, True)
+        for magnesio in collected_magnesios:
+            magnesio.apply_effect(character)
+
     def apply_effect(self, character):
         """
         Applies the stamina boost effect to the character.
-
-        Args:
-            character (Character): The character object whose stamina is to be restored.
         
-        The character's stamina is increased by `stamina_boost` but does not exceed `max_stamina`.
+        Args:
+            character: The character object whose stamina is to be restored.
         """
         character.stamina = min(character.stamina + self.stamina_boost, character.max_stamina)

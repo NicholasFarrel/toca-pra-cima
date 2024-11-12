@@ -73,6 +73,7 @@ class Character:
         self.climbingFrames, self.movingLeftFrames, self.movingRightFrames = createAnimation(self)
         self.frame = 0
         self.time = 0
+        self.image = self.climbingFrames[0]
 
 
     def draw(self, surface):
@@ -158,7 +159,4 @@ class Girl(Character):
         """
         super().__init__(x, y, speed=3, max_stamina=80)
         # Load and set the character image
-        self.image = pygame.transform.scale(
-            pygame.image.load("sprites/characters/girl.png").convert_alpha(),
-            (50, 50)
-        )
+        
