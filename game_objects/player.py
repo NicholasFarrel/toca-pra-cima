@@ -114,11 +114,7 @@ class Character:
             #screen.blit(self.movingLeftFrames[math.floor(self.frame % len(self.movingLeftFrames))], self.rect.center) 
             self.image = self.climbingFrames[math.floor(self.frame % len(self.movingLeftFrames))]
         
-
-
-
         self.draw(screen)
-    
     
 
 class Boy(Character):
@@ -142,6 +138,7 @@ class Boy(Character):
             (50, 50)
         )
 
+
 class Girl(Character):
     """
     Represents the 'Girl' character with unique image, speed, and stamina values.
@@ -159,4 +156,5 @@ class Girl(Character):
         """
         super().__init__(x, y, speed=3, max_stamina=80)
         # Load and set the character image
+        
         
