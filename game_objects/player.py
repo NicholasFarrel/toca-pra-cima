@@ -6,6 +6,7 @@ def createAnimation(entity, rotation = 0):
     climbingImage = pygame.image.load(entity.imagePath['climbingImage'])
     movingLeftImage = pygame.image.load(entity.imagePath['movingLeftImage'])
     movingRightImage = pygame.image.load(entity.imagePath['movingRightImage'])
+    jumpingImage = pygame.image.load(entity.imagePath['jumpingImage'])
     
     climbingFrames = [
         pygame.transform.scale(    
@@ -30,7 +31,16 @@ def createAnimation(entity, rotation = 0):
         )
         for i in range(7)
     ]
-    return climbingFrames, movingLeftFrames, movingRightFrames
+    
+    jumpingFrames = [
+        pygame.transform.scale(
+            jumpingImage.subsurface(i * entity.original_frame_dimension[0], 0, *entity.original_frame_dimension),
+            entity.scaled_frame_dimension
+        )
+        for i in range(10)
+    ]
+
+    return climbingFrames, movingLeftFrames, movingRightFrames, jumpingFrames
 
 
 class Character:
@@ -56,24 +66,26 @@ class Character:
             max_stamina (int): The maximum stamina value for the character.
         """
         # Define the character's position and size
-        self.rect = pygame.Rect(x, y, 50, 50)
+        self.rect = pygame.Rect(x, y, 120, 120)
         # Initialize speed and stamina values
         self.speed = speed
         self.max_stamina = max_stamina
         self.stamina = max_stamina - 60  # Initialize stamina for testing purposes
         self.original_frame_dimension = (500,500)
-        self.scaled_frame_dimension = (200,200)
+        self.scaled_frame_dimension = (150,150)
         self.position = pygame.Vector2(x,y)
         self.imagePath = {
             'climbingImage' : 'sprites/characters/climbingImage.png',
             'movingLeftImage' : 'sprites/characters/movingLeftImage.png',
-            'movingRightImage' : 'sprites/characters/movingRightImage.png'
+            'movingRightImage' : 'sprites/characters/movingRightImage.png',
+            'jumpingImage' : 'sprites/characters/jumpingImage.png'
         }
         #'sprites/characters/char.png'
-        self.climbingFrames, self.movingLeftFrames, self.movingRightFrames = createAnimation(self)
+        self.climbingFrames, self.movingLeftFrames, self.movingRightFrames, self.jumpingFrames = createAnimation(self)
         self.frame = 0
         self.time = 0
         self.image = self.climbingFrames[0]
+        self.jumpFrame = 0
 
 
     def draw(self, surface):                      
@@ -83,6 +95,7 @@ class Character:
         Args:
             surface (pygame.Surface): The surface to draw the character onto.
         """
+        
         surface.blit(self.image, self.rect)
 
 
@@ -93,7 +106,7 @@ class Character:
         w = keys[pygame.K_w]
         s = keys[pygame.K_s]
         d = keys[pygame.K_d]
-
+        
         if self.time %  9 == 0 and w and not (a or d or s):
             self.frame += 1
            # screen.blit(self.climbingFrames[math.floor(self.frame % len(self.climbingFrames))], self.rect.center)
@@ -115,7 +128,7 @@ class Character:
             self.image = self.climbingFrames[math.floor(self.frame % len(self.movingLeftFrames))]
         
         self.draw(screen)
-    
+
 
 class Boy(Character):
     """
@@ -135,7 +148,7 @@ class Boy(Character):
         # Load and set the character image
         self.image = pygame.transform.scale(
             pygame.image.load("sprites/characters/boy.png").convert_alpha(),
-            (50, 50)
+            (20, 20)
         )
 
 

@@ -10,6 +10,7 @@ def handle_movement(position, character_speed):
     w = keys[pygame.K_w]
     s = keys[pygame.K_s]
     d = keys[pygame.K_d]
+    space = keys[pygame.K_SPACE]
     # Controles do personagem usando W, A, S, D ou setas
     if a and not (w or s or d) and position.x > 0:  # Esquerda
         print("esquerda")
@@ -20,6 +21,10 @@ def handle_movement(position, character_speed):
         position.y += character_speed
     if w and not (a or d or s) and position.y > Config.SCREEN_HEIGHT * 0.2:  # Cima (com limite)
         print("cima")
+        if space:
+            print("aasd")
+            position.y -= 100
         position.y -= character_speed
+
 
     return position
