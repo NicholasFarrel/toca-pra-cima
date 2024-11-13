@@ -1,8 +1,9 @@
 import pygame
+
 from scenes.game_scene import GameScene
 from game_objects.player import Boy, Girl
 from game_objects.powerup import Magnesio
-from game_objects import birds
+from game_objects import birds, obstacles
 from mechanics.stamina import StaminaBar
 from config import Config 
 from scenes.button import Button
@@ -66,6 +67,7 @@ def game():
     birds.initialize(character)
     stamina_bar = StaminaBar(x=10, y=10, width=200, height=20, max_stamina=character.max_stamina)
     clock = pygame.time.Clock()
+    obstacles.initialize(character.speed)
 
     def update():
         game_scene.update()
@@ -75,6 +77,7 @@ def game():
         stamina_bar.draw(screen)
         birds.update(screen, game_scene.bg_y_offset, character)
         Magnesio.update(character)
+        obstacles.update(Config.SCREEN_WIDTH, Config.SCREEN_HEIGHT, screen, game_scene.bg_y_offset)
 
     while running:
         update()
