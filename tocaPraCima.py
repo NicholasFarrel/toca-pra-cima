@@ -77,7 +77,7 @@ def game():
         stamina_bar.draw(screen)
         birds.update(screen, game_scene.bg_y_offset, character)
         Magnesio.update(character)
-        obstacles.update(Config.SCREEN_WIDTH, Config.SCREEN_HEIGHT, screen, game_scene.bg_y_offset)
+        obstacles.update(Config.SCREEN_WIDTH, screen,game_scene.bg_y_offset)
 
     while running:
         update()
