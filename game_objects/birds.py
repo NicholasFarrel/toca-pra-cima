@@ -2,305 +2,406 @@ import pygame
 import random
 import math
 
-
+# Global variables
 backgroundY = 0
 playerSpeed = 0
 
+def loadImage(imagePath, dimension):
+    """
+    Load an image from the given path and scale it to the specified dimensions.
 
-def loadImage(imagePath, dimesion):
-    image = pygame.image.load(imagePath).convert_alpha()
-    image = pygame.transform.scale(image,dimesion)
+    Args:
+        imagePath (str): Path to the image file.
+        dimension (tuple): Desired dimensions (width, height) for the image.
 
+    Returns:
+        pygame.Surface: The loaded and scaled image.
+    """
+    image = pygame.image.load(imagePath).convert_alpha()  # Load image with transparency
+    image = pygame.transform.scale(image, dimension)  # Scale image to given dimensions
     return image
 
 
-def createAnimation(entity, rotation = 0):
-    image = pygame.image.load(entity.imagePath)
+def createAnimation(entity, rotation=0):
+    """
+    Create an animation by slicing the sprite sheet of the entity into frames.
+
+    Args:
+        entity (object): The entity (e.g., bird) with the sprite sheet data.
+        rotation (int, optional): Rotation angle for frames. Default is 0.
+
+    Returns:
+        list: A list of frames (surfaces) for the animation.
+    """
+    image = pygame.image.load(entity.imagePath)  # Load the sprite sheet
     frames = [
         pygame.transform.scale(    
             image.subsurface(i * entity.original_frame_dimension[0], 0, *entity.original_frame_dimension),
             entity.scaled_frame_dimension
-            )
-        for i in range(8)
+        )
+        for i in range(8)  # Assuming there are 8 frames in the sprite sheet
     ]
     return frames
 
 
-class Bird():
-    def __init__(self, position, health, size, maxVelocitie, color, imagePath, scale,original_frame_dimension, scaled_frame_dimension ):
-        self.position = pygame.Vector2(position[0], position[1])
+class Bird:
+    """
+    A class to represent a generic Bird entity, which could be extended by specific bird types.
+    """
+
+    def __init__(self, position, health, size, maxVelocity, color, imagePath, scale, original_frame_dimension, scaled_frame_dimension):
+        """
+        Initialize a bird with the provided parameters.
+
+        Args:
+            position (tuple): Initial position of the bird (x, y).
+            health (int): Health of the bird.
+            size (int): Size of the bird.
+            maxVelocity (float): Maximum speed the bird can travel.
+            color (tuple): RGB color of the bird.
+            imagePath (str): Path to the bird's sprite sheet.
+            scale (float): Scaling factor for the bird's sprite.
+            original_frame_dimension (tuple): Original dimensions of each frame in the sprite sheet.
+            scaled_frame_dimension (tuple): Scaled dimensions of each frame.
+        """
+        self.position = pygame.Vector2(position)
         self.health = health
         self.size = size
-        self.maxVelocity = maxVelocitie
+        self.maxVelocity = maxVelocity
         self.rect = pygame.Rect(*self.position, size, size)
         self.color = color
-        self.velocity = pygame.Vector2(0,0)
-        self.acceleration = pygame.Vector2(0,0)
+        self.velocity = pygame.Vector2(0, 0)
+        self.acceleration = pygame.Vector2(0, 0)
         self.angle = 0
         self.original_frame_dimension = original_frame_dimension
         self.scaled_frame_dimension = scaled_frame_dimension
-        self.scaled_frame_dimension = (self.scale * 16, self.scale*16)
         self.frames = createAnimation(self)
         self.frame = 0
 
-
     def drawAnimation(self, screen):
+        """
+        Draw the bird's animation on the screen.
+
+        Args:
+            screen (pygame.Surface): The surface to draw the animation on.
+        """
         screen.blit(self.frames[math.floor(self.frame % len(self.frames))], self.rect.center)
-        self.frame += 1/5 * self.maxVelocity/10 
+        self.frame += 1/5 * self.maxVelocity/10  # Adjust frame speed based on velocity
 
 
 class Vulture(Bird):
     """
-    A class to represent a Vulture enemy in the game.
+    A class to represent a Vulture enemy that inherits from the Bird class.
 
-    Attributes:
-    -----------
-    x : int
-        The initial x-coordinate of the vulture, set randomly at the screen's edges.
-    position : pygame.Vector2
-        The position vector of the vulture.
-    health : int
-        The health points of the vulture.
-    damage : int
-        The damage points dealt by the vulture.
-    maxVelocity : float
-        The maximum velocity the vulture can achieve.
-    rect : pygame.Rect
-        The rectangular area representing the vulture for collision detection.
-    color : tuple
-        The color of the vulture.
-    size : int
-        The size of the vulture.
-    velocity : pygame.Vector2
-        The current velocity vector of the vulture.
-    acceleration : pygame.Vector2
-        The acceleration vector of the vulture.
-
-    Methods:
-    --------
-    move(player_position):
-        Updates the vulture's position to move toward the player.
-    dash(player_position, dif):
-        Performs a dash attack when the player is within a specific range.
-    check_corners(screen_width, screen_height):
-        Checks if the vulture has moved off the screen vertically.
-    render(screen):
-        Draws the vulture on the given screen surface.
+    Methods include movement, dashing, damage dealing, and rendering.
     """
 
-    def __init__(self, position, maxVelocity = 10, health=100, damage=10, size=40, color = (255,0,0)):
+    def __init__(self, position, maxVelocity=10, health=100, damage=10, size=40, color=(255, 0, 0)):
         """
-        Initialize a new vulture with random position and specified attributes.
+        Initialize a Vulture with the provided parameters.
 
-        Parameters:
-        -----------
-        screen_width : int
-            The width of the game screen.
-        screen_height : int
-            The height of the game screen.
-        health : int, optional
-            The health points of the vulture (default is 100).
-        damage : int, optional
-            The damage points dealt by the vulture (default is 10).
-        size : int, optional
-            The size of the vulture (default is 30).
+        Args:
+            position (tuple): Initial position of the vulture (x, y).
+            maxVelocity (float): Maximum velocity of the vulture.
+            health (int): Health points of the vulture.
+            damage (int): Damage dealt by the vulture.
+            size (int): Size of the vulture.
+            color (tuple): RGB color of the vulture.
         """
         self.imagePath = 'sprites/enemies/birdFlying.png'
         self.scale = 5
         self.original_frame_dimension = (160, 160)
-        self.scaled_frame_dimension = (self.scale * 16, self.scale*16)
+        self.scaled_frame_dimension = (self.scale * 16, self.scale * 16)
         self.dashTime = 0
         self.damageTime = 0
-        super().__init__(position, health, size, maxVelocity, color, self.imagePath, self.scale,self.original_frame_dimension, self.scaled_frame_dimension)
-       
-        self.damage = damage  
-
+        super().__init__(position, health, size, maxVelocity, color, self.imagePath, self.scale, self.original_frame_dimension, self.scaled_frame_dimension)
+        self.damage = damage
 
     def move(self, playerPosition, dy):
         """
-        Update the vulture's position to move toward the player.
+        Move the vulture towards the player.
 
-        Parameters:
-        -----------
-        player_position : pygame.Vector2
-            The current position of the player.
+        Args:
+            playerPosition (pygame.Vector2): The position of the player.
+            dy (float): The background offset for vertical movement.
         """
         dif = playerPosition - self.position
 
-        if dif.x < 0 :
-            self.imagePath =  'sprites/enemies/left.png'
+        # Set direction based on player position
+        if dif.x < 0:
+            self.imagePath = 'sprites/enemies/left.png'
         else:
             self.imagePath = 'sprites/enemies/birdFlying.png'
         self.frames = createAnimation(self)
 
         distance = dif.length()
-        # Adjust the velocity slightly toward the player's position
-
-        self.velocity.x += dif.x * 0.001
-        self.velocity.y += dif.y * 0.0001
+        self.velocity.x += dif.x * 0.001  # Move slightly towards player in x direction
+        self.velocity.y += dif.y * 0.0001  # Move slightly towards player in y direction
         self.position += self.velocity
 
         if abs(dy) == playerSpeed:
             self.position.y += dy
 
-        if (self.velocity.length() > self.maxVelocity):
+        if self.velocity.length() > self.maxVelocity:
             self.velocity = self.velocity.normalize() * self.maxVelocity
 
-        if (self.dashTime > 20):
-            self.velocity = self.velocity.normalize() * self.maxVelocity
+        if self.dashTime > 20:
+            self.velocity = self.velocity.normalize() * self.maxVelocity  # Boost dash speed
 
-        self.dash(playerPosition, dif)
+        self.dash(playerPosition, dif)  # Perform dash attack
         self.rect = pygame.Rect(self.position.x, self.position.y, self.size, self.size)
         self.damageTime += 1
 
-        self.angle = math.atan2(dif.x, dif.y)*180/3.1415926535897932
+        self.angle = math.atan2(dif.x, dif.y) * 180 / math.pi
         self.orientation(distance)
 
+    def orientation(self, distance):
+        """
+        Adjust the vulture's orientation based on its movement direction and distance.
 
-    def orientation (self, distance):
-        if distance > 20 and self :    
-            if self.angle < 0:
-                self.angle = - self.angle % 30
-            else:
-                self.angle = self.angle % 30
+        Args:
+            distance (float): The distance between the vulture and the player.
+        """
+        if distance > 20:
+            self.angle = self.angle % 30  # Adjust angle in multiples of 30
         self.rotatedImage = pygame.transform.rotate(self.frames[math.floor(self.frame % len(self.frames))], self.angle)
-        
-
 
     def dealDamage(self, character):
-        if(self.damageTime > 60):
+        """
+        Deal damage to the character if the vulture collides with them.
+
+        Args:
+            character (object): The player character.
+        """
+        if self.damageTime > 60:
             character.stamina -= self.damage
             self.damageTime = 0
 
-
     def dash(self, playerPosition, dif):
         """
-        Perform a dash attack when the player is within a specific range.
+        Perform a dash attack if the player is within a specific range.
 
-        Parameters:
-        -----------
-        player_position : pygame.Vector2
-            The current position of the player.
-        dif : pygame.Vector2
-            The difference vector between the vulture and the player.
+        Args:
+            playerPosition (pygame.Vector2): The position of the player.
+            dif (pygame.Vector2): The difference vector between the vulture and player.
         """
-        if (playerPosition.y - self.position.y < 200 and playerPosition.y > self.position.y and abs(playerPosition.x - self.position.x) < 100):
-            # Quick movement towards the player
+        if playerPosition.y - self.position.y < 200 and playerPosition.y > self.position.y and abs(playerPosition.x - self.position.x) < 100:
             self.dashTime += 1
             self.velocity.y = dif.y * 0.1
             self.velocity.x = dif.x * 0.1
         else:
             self.dashTime = 0
 
-
     def check_corners(self, screen_width, screen_height):
         """
         Check if the vulture has moved off the screen vertically.
 
-        Parameters:
-        -----------
-        screen_width : int
-            The width of the game screen.
-        screen_height : int
-            The height of the game screen.
+        Args:
+            screen_width (int): The width of the game screen.
+            screen_height (int): The height of the game screen.
 
         Returns:
-        --------
-        bool
-            True if the vulture is off the screen vertically, False otherwise.
+            bool: True if the vulture is off the screen, False otherwise.
         """
         if self.position.y < 0 or self.position.y > screen_height:
             return True
         return False
 
+    def render(self, screen):
+        """
+        Render the vulture on the screen.
 
-    def render(self,screen):
+        Args:
+            screen (pygame.Surface): The screen to render the vulture on.
+        """
         screen.blit(self.rotatedImage, self.rect.center)
-        self.frame += 1/5 * self.velocity.length()/10
+        self.frame += 1 / 5 * self.velocity.length() / 10
 
 
 class Poop:
-    def __init__(self, position, velocity, damage= 10, color = (0,255,0), size = 13, ):
+    """
+    A class to represent the poop projectiles thrown by pigeons.
+    
+    Attributes:
+    ----------
+    position : pygame.Vector2
+        The position of the poop projectile.
+    velocity : pygame.Vector2
+        The velocity of the poop projectile.
+    damage : int
+        The damage dealt by the poop.
+    color : tuple
+        The color of the poop (RGB).
+    size : int
+        The size of the poop.
+    rect : pygame.Rect
+        The rectangular area representing the poop for collision detection.
+    dissapear : bool
+        A flag to determine whether the poop should disappear after hitting the player.
+
+    Methods:
+    --------
+    move(dy):
+        Updates the position of the poop.
+    dealDamage(character):
+        Deals damage to the player character when it collides with them.
+    render(screen):
+        Renders the poop on the screen.
+    """
+
+    def __init__(self, position, velocity, damage=10, color=(0, 255, 0), size=13):
+        """
+        Initialize a Poop object.
+
+        Args:
+            position (tuple): Initial position of the poop (x, y).
+            velocity (pygame.Vector2): Initial velocity of the poop.
+            damage (int, optional): The damage dealt by the poop. Default is 10.
+            color (tuple, optional): The color of the poop. Default is green.
+            size (int, optional): The size of the poop. Default is 13.
+        """
         self.imagePath = 'sprites/enemies/pigeon.png'
         self.position = position
         self.velocity = velocity
-        self.damage = 10
-        self.image = loadImage(self.imagePath, (size,size))
+        self.damage = 10  # Default damage
+        self.image = loadImage(self.imagePath, (size, size))
         self.color = color
         self.size = size
         self.rect = pygame.Rect(*self.position, self.size, self.size)
         self.dissapear = False
 
-
     def move(self, dy):
-        self.velocity += pygame.Vector2(0,0.2)
+        """
+        Update the position of the poop with gravity and speed adjustments.
+
+        Args:
+            dy (float): The background offset for vertical movement.
+        """
+        self.velocity += pygame.Vector2(0, 0.2)  # Apply gravity
         self.position += self.velocity
-        if(abs(dy) == playerSpeed):
+        if abs(dy) == playerSpeed:
             self.position.y += dy
 
         self.rect = pygame.Rect(*self.position, self.size, self.size)
 
-    
     def dealDamage(self, character):
-        character.stamina -= self.damage
-        print(character.stamina)
-        self.dissapear = True
-        
+        """
+        Deal damage to the player character.
+
+        Args:
+            character (object): The player character.
+        """
+        character.stamina -= self.damage  # Reduce character's stamina by damage
+        self.dissapear = True  # Mark the poop to disappear after hitting the character
 
     def render(self, screen):
+        """
+        Render the poop on the screen.
+
+        Args:
+            screen (pygame.Surface): The surface to render the poop on.
+        """
         screen.blit(self.image, self.rect.center)
-       # pygame.draw.rect(screen, self.color, self.rect)
+        # pygame.draw.rect(screen, self.color, self.rect)  # Optional: draw the rectangle
 
 
 class Pigeon(Bird):
-    def __init__(self, position,health = 10, size = 50, maxVelocity = 5, color = (0,0,255)):
+    """
+    A class to represent a Pigeon enemy, a type of Bird that can drop poop.
+
+    Attributes:
+    ----------
+    poopTime : int
+        Time interval between each poop drop.
+    time : int
+        A counter for time until the next poop drop.
+    poops : list
+        List of Poop objects that the pigeon has dropped.
+
+    Methods:
+    --------
+    move(dy):
+        Updates the pigeon’s position and checks if it’s time to drop poop.
+    poop(dy):
+        Drops a poop after a specific interval and moves all dropped poops.
+    """
+
+    def __init__(self, position, health=10, size=50, maxVelocity=5, color=(0, 0, 255)):
+        """
+        Initialize a Pigeon object with given parameters.
+
+        Args:
+            position (tuple): Initial position of the pigeon (x, y).
+            health (int, optional): Health points of the pigeon. Default is 10.
+            size (int, optional): Size of the pigeon. Default is 50.
+            maxVelocity (float, optional): Maximum velocity of the pigeon. Default is 5.
+            color (tuple, optional): Color of the pigeon. Default is blue.
+        """
         self.imagePath = 'sprites/enemies/birdFlying.png'
         self.scale = 5
         self.original_frame_dimension = (160, 160)
-        self.scaled_frame_dimension = (self.scale * 16, self.scale*16)
-        super().__init__(position, health, size, maxVelocity, color, self.imagePath, self.scale,self.original_frame_dimension, self.scaled_frame_dimension)
+        self.scaled_frame_dimension = (self.scale * 16, self.scale * 16)
+        super().__init__(position, health, size, maxVelocity, color, self.imagePath, self.scale, self.original_frame_dimension, self.scaled_frame_dimension)
         self.image = pygame.image.load(self.imagePath)
-        self.velocity = pygame.Vector2(random.randint(2,maxVelocity), 0)
-        self.poopTime = random.randint(30,100)
+        self.velocity = pygame.Vector2(random.randint(2, maxVelocity), 0)
+        self.poopTime = random.randint(30, 100)  # Random time for poop drops
         self.time = 0
         self.poops = []
 
-
     def move(self, dy):
-        if(abs(dy) == playerSpeed):
+        """
+        Move the pigeon and check if it's time to drop poop.
+
+        Args:
+            dy (float): The background offset for vertical movement.
+        """
+        if abs(dy) == playerSpeed:
             self.position.y += dy
-        self.position += self.velocity 
+        self.position += self.velocity  # Move pigeon in the x-direction
         self.rect = pygame.Rect(*self.position, self.size, self.size)
-        self.poop(dy)
+        self.poop(dy)  # Check for poop drop
 
+    def poop(self, dy):
+        """
+        Check if it's time to drop a poop. If it is, create a new Poop object.
 
-    def poop(self,dy):
-        if (self.time > self.poopTime):
-            p = Poop(self.position.copy(), self.velocity.copy())
+        Args:
+            dy (float): The background offset for vertical movement.
+        """
+        if self.time > self.poopTime:
+            p = Poop(self.position.copy(), self.velocity.copy())  # Create a new Poop object
             self.poops.append(p)
             self.time = 0
         else:
             self.time += 1
         
         for poop in self.poops:
-            poop.move(dy)
+            poop.move(dy)  # Move all existing poops
 
 
-
-# List to store vulture instances
-vulturesPosition = [(0,100),(500,500), (0,0), (0,700)]
-pigeonsPosition = [(0,100),(0,400)]
+# List to store vulture and pigeon instances
+vulturesPosition = [(0, 100), (500, 500), (0, 0), (0, 700)]
+pigeonsPosition = [(0, 100), (0, 400)]
 vultures = []
 pigeons = []
 
 
 def initialize(character):
-    global playerSpeed
-    playerSpeed = character.speed
+    """
+    Initialize the vultures and pigeons and store them in the respective lists.
 
+    Args:
+        character (object): The player character (used to set player speed).
+    """
+    global playerSpeed
+    playerSpeed = character.speed  # Set the player speed
+
+    # Initialize vultures
     for vPos in vulturesPosition:
         v = Vulture(vPos)
         vultures.append(v)
+
+    # Initialize pigeons
     for pPos in pigeonsPosition:
         p = Pigeon(pPos)
         pigeons.append(p)
@@ -308,40 +409,38 @@ def initialize(character):
 
 def update(screen, bg_y_offset, character):
     """
-    Update the vulture instances, move them, and render them on the screen.
+    Update all enemy positions, check for collisions with the player, and render them.
 
-    Parameters:
-    -----------
-    screen : pygame.Surface
-        The surface on which to render the vultures.
-    screen_width : int
-        The width of the game screen.
-    screen_height : int
-        The height of the game screen.
-    player_position : pygame.Vector2
-        The current position of the player.
+    Args:
+        screen (pygame.Surface): The surface on which to render the enemies.
+        bg_y_offset (float): The vertical offset of the background (for parallax scrolling).
+        character (object): The player character for collision detection.
     """
     global backgroundY
 
-    playerPosition =  pygame.math.Vector2(character.rect.center)
-    playerRect = character.rect
+    playerPosition = pygame.math.Vector2(character.rect.center)  # Get player position
+    playerRect = character.rect  # Get player rectangle for collision detection
 
-    dy = bg_y_offset - backgroundY
-    backgroundY = bg_y_offset
+    dy = bg_y_offset - backgroundY  # Calculate vertical movement offset
+    backgroundY = bg_y_offset  # Update the background Y offset
 
     # Move and render each vulture
     for v in vultures:
-        v.move(playerPosition, dy)
-        if v.rect.colliderect(playerRect):
+        v.move(playerPosition, dy)  # Move vulture towards player
+        if v.rect.colliderect(playerRect):  # Check for collision with player
             v.dealDamage(character)
-        v.render(screen)
+        v.render(screen)  # Render the vulture
 
+    # Move and render each pigeon
     for p in pigeons:
-        p.move(dy)
-        p.drawAnimation(screen)
+        p.move(dy)  # Move pigeon
+        p.drawAnimation(screen)  # Draw the pigeon's animation
 
+        # Remove poops that have disappeared
         p.poops[:] = [poop for poop in p.poops if not poop.dissapear]
+
+        # Check for collision of each poop with the player
         for poop in p.poops:
-            if poop.rect.colliderect(playerRect):
+            if poop.rect.colliderect(playerRect):  # Check for poop collision with player
                 poop.dealDamage(character)
-            poop.render(screen)
+            poop.render(screen)  # Render the poop
