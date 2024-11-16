@@ -11,8 +11,8 @@ class Magnesio(pygame.sprite.Sprite):
         
         # Load and scale the magnesium image
         self.image = pygame.transform.scale(
-            pygame.image.load("sprites/items/magnesio.png").convert_alpha(),
-            (20, 20)
+            pygame.image.load("sprites/items/sack.png").convert_alpha(),
+            (50, 50)
         )
         # Set the initial position of the item
         self.rect = self.image.get_rect(topleft=(x, y))

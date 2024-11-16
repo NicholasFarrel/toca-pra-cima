@@ -87,7 +87,7 @@ def game():
     birds.initialize(character)  # Initialize birds (enemies or obstacles)
     stamina_bar = StaminaBar(x=10, y=10, width=200, height=20, max_stamina=character.max_stamina)  # Initialize stamina bar
     clock = pygame.time.Clock()
-    obstacles.initialize(character.speed)  # Initialize obstacles
+    obstacles.initialize(character.velocity)  # Initialize obstacles
 
     def update():
         """
@@ -98,9 +98,9 @@ def game():
         game_scene.draw()  # Draw the game scene
         character.drawAnimation(screen)  # Draw the player character's animation
         stamina_bar.draw(screen)  # Draw the stamina bar
-        birds.update(screen, game_scene.bg_y_offset, character)  # Update and draw birds
+        birds.update(screen, game_scene.bg_y_offset,game_scene.bg_x_offset, character)  # Update and draw birds
         Magnesio.update(character)  # Update and check powerups
-        obstacles.update(Config.SCREEN_WIDTH, screen, game_scene.bg_y_offset)  # Update obstacles
+        obstacles.update(Config.SCREEN_WIDTH, screen, game_scene.bg_y_offset, game_scene.bg_x_offset)  # Update obstacles
 
     while running:
         update()  # Update game objects
@@ -120,10 +120,13 @@ def main_menu():
     Display the main menu. This menu lets the player start the game or quit.
     """
     global running
-    backgroundImage = pygame.transform.scale(
-        pygame.image.load('sprites/menu/Background.png'),
-        (Config.SCREEN_WIDTH, Config.SCREEN_HEIGHT)
-    )
+    backgroundImage = pygame.image.load('sprites/menu/Background.png')
+    zoomFactor = 1
+    
+    newWidth = int(backgroundImage.get_width() * zoomFactor)
+    newHeight = int(backgroundImage.get_height() * zoomFactor)
+
+    backgroundImage = pygame.transform.scale(backgroundImage, (newWidth, newHeight))
 
     # Define the "Play" button in the main menu
     playButton = Button(

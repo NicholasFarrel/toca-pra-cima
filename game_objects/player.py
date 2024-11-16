@@ -55,7 +55,7 @@ class Character:
     """
 
 
-    def __init__(self, x, y, speed, max_stamina):
+    def __init__(self, x, y, speed, max_stamina, size):
         """
         Initializes the character with position, speed, and stamina values.
 
@@ -66,13 +66,13 @@ class Character:
             max_stamina (int): The maximum stamina value for the character.
         """
         # Define the character's position and size
-        self.rect = pygame.Rect(x, y, 120, 120)
+        self.rect = pygame.Rect(x , y, size, size)
         # Initialize speed and stamina values
-        self.speed = speed
+        self.velocity = pygame.Vector2(speed,speed)
         self.max_stamina = max_stamina
         self.stamina = max_stamina - 60  # Initialize stamina for testing purposes
         self.original_frame_dimension = (500,500)
-        self.scaled_frame_dimension = (150,150)
+        self.scaled_frame_dimension = (1.5*size, 1.5*size)
         self.position = pygame.Vector2(x,y)
         self.imagePath = {
             'climbingImage' : 'sprites/characters/climbingImage.png',
@@ -86,6 +86,7 @@ class Character:
         self.time = 0
         self.image = self.climbingFrames[0]
         self.jumpFrame = 0
+        self.damage = 0
 
 
     def draw(self, surface):                      
@@ -100,32 +101,37 @@ class Character:
 
 
     def drawAnimation(self, screen):
-        self.time += 1
         keys = pygame.key.get_pressed()
         a = keys[pygame.K_a]
         w = keys[pygame.K_w]
         s = keys[pygame.K_s]
         d = keys[pygame.K_d]
+        space = keys[pygame.K_SPACE]
+
+        if space:
+            self.damage = 10
+        else:
+            self.damage = 0
         
-        if self.time %  9 == 0 and w and not (a or d or s):
-            self.frame += 1
+        if w and not (a or d or s):
+            self.frame += 1 / 5 * self.velocity.y / 10
            # screen.blit(self.climbingFrames[math.floor(self.frame % len(self.climbingFrames))], self.rect.center)
             self.image = self.climbingFrames[math.floor(self.frame % len(self.climbingFrames))]
 
-        if self.time % 9 == 0 and a and not (w or s or d) :
-            self.frame += 1
+        if s and not (w or a or d) :
+            self.frame += 1 / 5 * self.velocity.y / 10
+            #screen.blit(self.movingLeftFrames[math.floor(self.frame % len(self.movingLeftFrames))], self.rect.center) 
+            self.image = self.climbingFrames[math.floor(self.frame % len(self.movingLeftFrames))]
+        
+        if a and not (w or s or d) :
+            self.frame += 1 / 5 * self.velocity.x / 10
             #screen.blit(self.movingLeftFrames[math.floor(self.frame % len(self.movingLeftFrames))], self.rect.center) 
             self.image = self.movingLeftFrames[math.floor(self.frame % len(self.movingLeftFrames))]
         
-        if self.time % 9 == 0 and d and not (w or a or s):
-            self.frame += 1
+        if d and not (w or a or s):
+            self.frame += 1 / 5 * self.velocity.x / 10
             #screen.blit(self.movingLeftFrames[math.floor(self.frame % len(self.movingLeftFrames))], self.rect.center) 
             self.image = self.movingRightFrames[math.floor(self.frame % len(self.movingLeftFrames))]
-        
-        if self.time % 9 == 0 and s and not (w or a or d) :
-            self.frame += 1
-            #screen.blit(self.movingLeftFrames[math.floor(self.frame % len(self.movingLeftFrames))], self.rect.center) 
-            self.image = self.climbingFrames[math.floor(self.frame % len(self.movingLeftFrames))]
         
         self.draw(screen)
 
@@ -144,7 +150,7 @@ class Boy(Character):
             x (int): The x-coordinate of the top-left corner of the boy character.
             y (int): The y-coordinate of the top-left corner of the boy character.
         """
-        super().__init__(x, y, speed=2, max_stamina=100)
+        super().__init__(x, y, speed=2, max_stamina=100, size = 200)
         # Load and set the character image
         self.image = pygame.transform.scale(
             pygame.image.load("sprites/characters/boy.png").convert_alpha(),
@@ -167,7 +173,7 @@ class Girl(Character):
             x (int): The x-coordinate of the top-left corner of the girl character.
             y (int): The y-coordinate of the top-left corner of the girl character.
         """
-        super().__init__(x, y, speed=3, max_stamina=80)
+        super().__init__(x, y, speed=7, max_stamina=800, size = 150)
         # Load and set the character image
         
         

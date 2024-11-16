@@ -3,6 +3,7 @@ import random
 
 # Background Y position offset
 backgroundY = 0
+backgroundX = 0
 # Player speed, to control vertical movement
 playerSpeed = 0
 
@@ -62,15 +63,19 @@ class Cloud:
         global playerSpeed
         playerSpeed = speed
        
-    def move(self, dy):
+    def move(self, dy, dx):
         """
         Moves the cloud horizontally based on its speed and vertically if dy matches player speed.
         
         Args:
             dy (int): Change in the y-coordinate to apply to the cloud.
         """
-        if abs(dy) == playerSpeed:
+        if abs(dy) == playerSpeed.y:
             self.position.y += dy
+        if abs(dx) == playerSpeed.x:
+            self.position.x += dx
+
+        
         self.position.x += self.speed
         self.rect = pygame.Rect(*self.position, *self.size)
         
@@ -121,7 +126,7 @@ def initialize(speed):
     for position in range:
         clouds.append([])
 
-def update(screen_width, screen, bg_y_offset):
+def update(screen_width, screen, bg_y_offset, bg_x_offset):
     """
     Updates cloud positions, adds new clouds, and renders them on the screen.
     
@@ -130,10 +135,12 @@ def update(screen_width, screen, bg_y_offset):
         screen (pygame.Surface): The game screen to render the clouds on.
         bg_y_offset (int): Current vertical offset of the background.
     """
-    global range, backgroundY
+    global range, backgroundY, backgroundX
 
     dy = bg_y_offset - backgroundY
+    dx = bg_x_offset - backgroundX
     backgroundY = bg_y_offset
+    backgroundX = bg_x_offset
 
     for i, position in enumerate(range):
         # Move clouds vertically if dy matches player speed
@@ -150,7 +157,7 @@ def update(screen_width, screen, bg_y_offset):
         clouds[i][:] = [c for c in clouds[i] if not c.check_screen(screen_width)]
         
         for c in clouds[i]:
-            c.move(dy)
+            c.move(dy, dx)
             c.render(screen)
             # Spawn a new cloud if the current one is near the right edge and hasn't spawned another cloud
             if c.touch_screen(screen_width) and not c.daughter:
