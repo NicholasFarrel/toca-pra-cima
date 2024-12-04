@@ -1,9 +1,52 @@
 import pygame
 import random
 import math
-from src.systems.rendering import load_image, draw_bird_animation, render_poop, render_vulture
+from src.systems.rendering import load_image, draw_bird_animation, render_poop, render_vulture, render_feathers
 from src.game.assets import create_bird_animation
-from src.systems.physics import check_vulture_corners
+from src.systems.physics import check_vulture_corners, apply_gravity
+from src.game.constants import *
+
+class Feather:
+    def __init__(self, position, type, size = 20):
+        self.velocity = pygame.Vector2(random.randint(-5,5),random.randint(-1,1))
+        self.acceleration = pygame.Vector2(0,0)
+        self.position = position
+        self.type = type
+        self.color = colors[type]
+        self.size = size
+        self.rect = pygame.Rect(*self.position,size,size)
+        self.time = 60 * 10
+        self.falling = True
+        self.rotate_time = 10
+        self.angle = math.degrees(math.atan2(self.velocity.y, self.velocity.x))
+        self.image = pygame.transform.scale(
+            pygame.image.load(f'assets/sprites/birds/feathers/{self.type}.png'),
+            (60,60)
+        )
+        self.original_image = self.image
+
+    
+    def update(self):
+        self.acceleration += GRAVITY_FORCE
+        self.velocity += GRAVITY_FORCE*0.001
+        self.position += self.velocity 
+        self.rotate_time -= 1
+        self.time -= 1
+        if self.rotate_time <= 0:
+            self.update_orientation()
+
+    def update_orientation(self):
+        # Calculate the new angle
+        new_angle = math.degrees(math.atan2(self.velocity.y, self.velocity.x))
+        
+        # Only update the image if the angle has changed significantly
+        if abs(new_angle - self.angle) > 1:  # Adjust threshold as needed
+            self.angle = new_angle
+            self.image = pygame.transform.rotate(self.original_image, self.angle)
+            #self.rect = self.image.get_rect(center=self.position)
+        
+        # Reset rotate_time to delay the next orientation update
+        self.rotate_time = 0  # Adjust as needed
 
 class Bird:
     """
@@ -38,12 +81,9 @@ class Bird:
         self.scaled_frame_dimension = scaled_frame_dimension
         self.frames = create_bird_animation(self)
         self.frame = 0
+        self.feathers = []
+        self.damage_cooldown = 10
 
-    def receiveDamage(self, player):
-        distance = (self.position - player.position).length()
-        if distance < 100 and player.damage != 0 :
-            print("a")
-            self.health -= player.damage
 
 
 class Vulture(Bird):
@@ -53,7 +93,7 @@ class Vulture(Bird):
     Methods include movement, dashing, damage dealing, and rendering.
     """
 
-    def __init__(self, position, type, maxVelocity=10, health=100, damage=10, size=40, color=(255, 0, 0)):
+    def __init__(self, position, type, maxVelocity=10, health=3, damage=1, size=100, color=(255, 0, 0)):
         """
         Initialize a Vulture with the provided parameters.
 
@@ -66,6 +106,7 @@ class Vulture(Bird):
             color (tuple): RGB color of the vulture.
         """
         self.type = type
+        self.color = colors[type]
         self.imagePath = f'assets/sprites/birds/birdFlying{self.type}Right.png'
         self.scale = 5
         self.original_frame_dimension = (160, 160)
@@ -85,8 +126,6 @@ class Vulture(Bird):
             dy (float): The background offset for vertical movement.
         """
         dif = player.position - self.position
-
-        print(f'dif = {dif} , player = {player.position} , bird = {self.position}')
 
         # Set direction based on player position
         if dif.x < 0:
@@ -201,7 +240,7 @@ class Poop:
         Renders the poop on the screen.
     """
 
-    def __init__(self, position, velocity, damage=10, color=(0, 255, 0), size=13):
+    def __init__(self, position, velocity, damage=1, color=(0, 255, 0), size=13):
         """
         Initialize a Poop object.
 
@@ -215,7 +254,7 @@ class Poop:
         self.imagePath = 'assets/sprites/birds/birdFlyingBrownRight.png'
         self.position = position
         self.velocity = velocity
-        self.damage = 10  # Default damage
+        self.damage = damage  # Default damage
         self.image = load_image(self.imagePath, (size, size))
         self.color = color
         self.size = size
@@ -267,7 +306,7 @@ class Pigeon(Bird):
         Drops a poop after a specific interval and moves all dropped poops.
     """
 
-    def __init__(self, position, health=10, size=50, maxVelocity=5, color=(0, 0, 255)):
+    def __init__(self, position, health=3, size=50, maxVelocity=5, color=(0, 0, 255)):
         """
         Initialize a Pigeon object with given parameters.
 
@@ -280,6 +319,7 @@ class Pigeon(Bird):
         """
         self.imagePath = 'assets/sprites/birds/birdFlyingBrownRight.png'
         self.scale = 5
+        self.type = 'RED'
         self.original_frame_dimension = (160, 160)
         self.scaled_frame_dimension = (self.scale * 16, self.scale * 16)
         super().__init__(position, health, size, maxVelocity, color, self.imagePath, self.scale, self.original_frame_dimension, self.scaled_frame_dimension)
@@ -320,12 +360,16 @@ class Pigeon(Bird):
 
 
 # List to store vulture and pigeon instances
-blueVulturesPosition = [(0, 100)]
+blueVulturesPosition = []
 yellowVulturesPosition = []
-pigeonsPosition = [(0, 100)]
-vultures = []
-pigeons = []
+pigeonsPosition = []
+feathers = []
 
+
+def update_feathers(screen, camera):
+        for feather in feathers:
+            feather.update()
+        render_feathers(feathers, screen, camera)
 
 def initialize(player):
     """
@@ -337,12 +381,15 @@ def initialize(player):
     global playerSpeed
     playerSpeed = player.velocity  # Set the player speed
 
+    vultures = []
+    pigeons = []
+
     # Initialize vultures
     for vPos in blueVulturesPosition:
-        v = Vulture(vPos, 'Blue')
+        v = Vulture(vPos, 'BLUE')
         vultures.append(v)
     for vPos in yellowVulturesPosition:
-        v = Vulture(vPos, 'Brown')
+        v = Vulture(vPos, 'YELLOW')
         vultures.append(v)
 
     # Initialize pigeons
@@ -350,8 +397,10 @@ def initialize(player):
         p = Pigeon(pPos)
         pigeons.append(p)
 
+    return [pigeons, vultures]
 
-def update(screen, camera, player):
+
+def update(screen, camera, player, enemies):
     """
     Update all enemy positions, check for collisions with the player, and render them.
 
@@ -360,42 +409,46 @@ def update(screen, camera, player):
         bg_y_offset (float): The vertical offset of the background (for parallax scrolling).
         player (object): The player player for collision detection.
     """
+    global feathers
+
+    pigeons, vultures = enemies[0], enemies[1]
+    feathers[:] = [f for f in feathers if f.time > 0]
+    update_feathers(screen,camera)
+
 
     # Move and render each vulture
     vultures[:] = [v for v in vultures if v.health > 0]
     for v in vultures:
         v.move(player)  # Move vulture towards player
-        if v.rect.colliderect(player.rect):  # Check for collision with player
+        dif = v.position - player.position
+        distance = dif.length()
+        if distance < 50:  # Check for collision with player
             v.dealDamage(player)
         
-        v.rect.x -= camera.position.x
-        v.rect.y -= camera.position.y
-
-        render_vulture(v,screen)  # Render the vulture
-        v.receiveDamage(player)
+        
+        render_vulture(v,screen, camera)  # Render the vulture
+        v.damage_cooldown -= 1
+        
 
         for v2 in vultures:
             v.checkCollision(v2)
 
     # Move and render each pigeon
+    pigeons[:] = [p for p in pigeons if p.health > 0]
     for p in pigeons:
         p.move()  # Move pigeon
 
-        p.rect.x -= camera.position.x
-        p.rect.y -= camera.position.y
 
-        draw_bird_animation(p,screen) # Draw the pigeon's animation
-        p.receiveDamage(player)
+        draw_bird_animation(p,screen, camera) # Draw the pigeon's animation
 
         # Remove poops that have disappeared
         p.poops[:] = [poop for poop in p.poops if not poop.dissapear]
+
+        p.damage_cooldown -= 1
 
         # Check for collision of each poop with the player
         for poop in p.poops:
             if poop.rect.colliderect(player.rect):  # Check for poop collision with player
                 poop.dealDamage(player)
 
-            p.rect.x -= camera.position.x
-            p.rect.y -= camera.position.y
-
-            render_poop(poop,screen)  # Render the poop
+            render_poop(poop,screen,camera)  # Render the poop

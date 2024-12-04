@@ -1,4 +1,5 @@
 import pygame
+from src.game.constants import *
 
 def check_vulture_corners(vulture, screen_width, screen_height):
         """
@@ -14,3 +15,8 @@ def check_vulture_corners(vulture, screen_width, screen_height):
         if vulture.position.y < 0 or vulture.position.y > screen_height:
             return True
         return False
+
+
+def apply_gravity(object):
+    object.velocity += GRAVITY_FORCE*0.001
+

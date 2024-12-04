@@ -4,8 +4,11 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '.
 
 from src.game.constants import *
 from src.game.settings import *
+from src.entities.enemy import Feather, feathers
 import pygame
 import math
+import random
+
 
 
 def handle_input_for_pause_menu(pause_menu_assets):
@@ -17,7 +20,6 @@ def handle_input_for_pause_menu(pause_menu_assets):
             quit()
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:  # Enter key to start the game
-                print("return")
                 pygame.time.wait(300)
                 return False # Exit the pause menu and returns to the game
 
@@ -79,7 +81,7 @@ def player_movements(player,camera,background,keys):
         player.frame += 1 / 5 * player.velocity.y / 10
         player.image = char['climbingFrames'][math.floor(player.frame % len(char['climbingFrames']))]
     
-    if player.last_key_pressed == 's' and s and player.position.y + player.velocity.y <= 0:
+    if player.last_key_pressed == 's' and s and player.position.y + player.velocity.y <= 450:
         if player.position.y - camera.position.y > 0.6 * SCREEN_HEIGHT and camera.position.y + player.velocity.y <= 0:
             camera.position.y += player.velocity.y
             
@@ -103,15 +105,17 @@ def player_movements(player,camera,background,keys):
         player.frame += 1 / 5 * player.velocity.x / 10
         player.image = char['movingRightFrames'][math.floor(player.frame % len(char['movingLeftFrames']))]
 
-    player.rect.x = player.position.x
-    player.rect.y = player.position.y 
+    player.rect.topleft = player.position 
 
 
-def handle_input(player, camera, background, is_paused):
+def handle_input(player, camera, enemies, background, is_paused):
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
             quit()
+        if event.type == pygame.MOUSEBUTTONUP:
+            mouse_buttons = pygame.mouse.get_pressed()
+            handle_bird(enemies, mouse_buttons, camera)
 
     keys = pygame.key.get_pressed()
 
@@ -121,6 +125,25 @@ def handle_input(player, camera, background, is_paused):
 
     if not is_paused:
         player_movements(player,camera,background,keys)
+        handle_bird(enemies, keys, camera)
     
 
     return is_paused
+
+
+def handle_bird(enemies, mouse_buttons, camera):
+    
+    mouse_position = pygame.Vector2(pygame.mouse.get_pos())
+    if mouse_buttons[0]:
+        for bird_list in enemies:
+            for bird in bird_list:
+                bird_screen_position = bird.rect.center - camera.position
+                dif = bird_screen_position - mouse_position
+                if dif.length() < 100 and bird.damage_cooldown < 0:
+                    for i in range(random.randint(3,8)):
+                        f = Feather( (random.uniform(bird.position.x , bird.position.x + bird.size), random.uniform(bird.position.y, bird.position.y + bird.size) -30), bird.type)
+                        bird.feathers.append(f)
+                        feathers.append(f)
+                    bird.damage_cooldown = 5
+                    bird.health -= 1
+                        

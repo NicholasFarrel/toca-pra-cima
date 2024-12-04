@@ -37,13 +37,12 @@ def main_loop():
                 girl = Girl(SCREEN_WIDTH//2, SCREEN_HEIGHT//2)
                 camera = Camera(0,0)
                 background = Background()
-                enemy.initialize(girl)
+                enemies = enemy.initialize(girl)
         else:
             if not is_paused:
-                is_paused = handle_input(girl, camera, background, is_paused)
+                is_paused = handle_input(girl, camera,enemies, background, is_paused)
                 render_scene(screen, camera, girl, background)
-                
-                enemy.update(screen, camera, girl)
+                enemy.update(screen, camera, girl, enemies)
             else:
                 is_paused = pause_menu(screen)
 

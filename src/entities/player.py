@@ -57,6 +57,6 @@ class Girl(Character):
             x (int): The x-coordinate of the top-left corner of the girl character.
             y (int): The y-coordinate of the top-left corner of the girl character.
         """
-        super().__init__(x, y, speed=70, max_stamina=800, size = char['size'])
+        super().__init__(x, y, speed=10, max_stamina=800, size = char['size'])
         
     

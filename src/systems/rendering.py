@@ -34,14 +34,20 @@ def render_scene(screen,camera, player, background):
     screen.fill(BLACK)
     background.rect = pygame.Rect(background.position.x, background.position.y, background.image.get_width(),background.image.get_height())
     
-    player.rect.y -= camera.position.y
-    player.rect.x -= camera.position.x
-    background.rect.y -= camera.position.y
-    background.rect.x -= camera.position.x
+    player.rect.topleft -= camera.position
+    background.rect.topleft -= camera.position
 
     screen.blit(background.image, background.rect)
 
-    screen.blit(player.image, player.rect)
+    imageRect = player.rect.copy()
+    imageRect.x -= player.size/4
+    
+
+    screen.blit(player.image, imageRect)
+    #pygame.draw.rect(screen, BLACK, player.rect, 2)
+
+    player.rect.topleft = player.position
+    background.rect.topleft = background.position
 
 
 def load_image(imagePath, dimension):
@@ -60,34 +66,48 @@ def load_image(imagePath, dimension):
     return image
 
 
-def draw_bird_animation(bird, screen):
+def draw_bird_animation(bird, screen, camera):
         """
         Draw the bird's animation on the screen.
 
         Args:
             screen (pygame.Surface): The surface to draw the animation on.
         """
+        bird.rect.topleft -= camera.position
         screen.blit(bird.frames[math.floor(bird.frame % len(bird.frames))], bird.rect.center)
         bird.frame += 1/5 * bird.maxVelocity/10  # Adjust frame speed based on velocity
+        bird.rect.topleft = bird.position
 
 
-def render_poop(poop, screen):
+def render_poop(poop, screen, camera):
     """
         Render the poop on the screen.
 
         Args:
             screen (pygame.Surface): The surface to render the poop on.
     """
+    poop.rect.topleft -= camera.position
     screen.blit(poop.image, poop.rect.center)
-    # pygame.draw.rect(screen, self.color, self.rect)  # Optional: draw the rectangle
+    poop.rect.topleft = poop.position
 
-def render_vulture(vulture, screen):
+
+def render_vulture(vulture, screen, camera):
         """
         Render the vulture on the screen.
 
         Args:
             screen (pygame.Surface): The screen to render the vulture on.
         """
-       
-        screen.blit(vulture.rotatedImage, vulture.rect.center)
+        vulture.rect.topleft -= camera.position
+        #pygame.draw.rect(screen, WHITE, vulture.rect,2)
+        screen.blit(vulture.rotatedImage, vulture.rect)
         vulture.frame += 1 / 5 * vulture.velocity.length() / 10
+        vulture.rect.topleft = vulture.position
+
+
+def render_feathers(feathers, screen, camera):
+    for feather in feathers:
+        feather.rect.center = feather.position 
+        feather.rect.topleft -= camera.position
+        #pygame.draw.rect(screen, feather.color, feather.rect)
+        screen.blit(feather.image, feather.rect)

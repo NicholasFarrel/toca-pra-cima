@@ -1,6 +1,18 @@
+import pygame
+
 WHITE = (255,255,255)
 BLACK = (0,0,0)
 BLUE = (0,0,255)
+GRAVITY = 10
+GRAVITY_FORCE = pygame.Vector2(0,GRAVITY)
+
+colors ={
+    'WHITE' : (255,255,255),
+    'BLACK' : (0,0,0),
+    'BLUE' : (0,0,255),
+    'RED' : (255,0,0),
+    'YELLOW' : (117, 95, 5),
+}
 
 char = {
     'image_path' : {
