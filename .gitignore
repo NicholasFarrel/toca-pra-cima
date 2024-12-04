@@ -1,0 +1,45 @@
+﻿# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual environment
+.env/
+.venv/
+
+# Cache and logs
+*.log
+*.cache
+*.tmp
+*.swp
+
+# Compiled files and executables
+*.so
+*.exe
+*.dll
+*.out
+*.app
+*.dmg
+
+# Package directories
+*.egg-info/
+dist/
+build/
+
+# IDE files (add your specific IDE if necessary)
+.vscode/
+.idea/
+*.sublime-workspace
+
+# Operating system files
+.DS_Store
+Thumbs.db
+
+# Pygame specific (if you save any game-specific runtime files)
+screenshots/
+saved_games/
+debug_logs/
+
+# Environment variables
+.env
