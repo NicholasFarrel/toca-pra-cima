@@ -1,44 +1,9 @@
 import pygame
 import random
 import math
-
-def loadImage(imagePath, dimension):
-    """
-    Load an image from the given path and scale it to the specified dimensions.
-
-    Args:
-        imagePath (str): Path to the image file.
-        dimension (tuple): Desired dimensions (width, height) for the image.
-
-    Returns:
-        pygame.Surface: The loaded and scaled image.
-    """
-    image = pygame.image.load(imagePath).convert_alpha()  # Load image with transparency
-    image = pygame.transform.scale(image, dimension)  # Scale image to given dimensions
-    return image
-
-
-def createAnimation(entity, rotation=0):
-    """
-    Create an animation by slicing the sprite sheet of the entity into frames.
-
-    Args:
-        entity (object): The entity (e.g., bird) with the sprite sheet data.
-        rotation (int, optional): Rotation angle for frames. Default is 0.
-
-    Returns:
-        list: A list of frames (surfaces) for the animation.
-    """
-    image = pygame.image.load(entity.imagePath)  # Load the sprite sheet
-    frames = [
-        pygame.transform.scale(    
-            image.subsurface(i * entity.original_frame_dimension[0], 0, *entity.original_frame_dimension),
-            entity.scaled_frame_dimension
-        )
-        for i in range(8)  # Assuming there are 8 frames in the sprite sheet
-    ]
-    return frames
-
+from src.systems.rendering import load_image, draw_bird_animation, render_poop, render_vulture
+from src.game.assets import create_bird_animation
+from src.systems.physics import check_vulture_corners
 
 class Bird:
     """
@@ -71,25 +36,14 @@ class Bird:
         self.angle = 0
         self.original_frame_dimension = original_frame_dimension
         self.scaled_frame_dimension = scaled_frame_dimension
-        self.frames = createAnimation(self)
+        self.frames = create_bird_animation(self)
         self.frame = 0
 
-    def drawAnimation(self, screen):
-        """
-        Draw the bird's animation on the screen.
-
-        Args:
-            screen (pygame.Surface): The surface to draw the animation on.
-        """
-        screen.blit(self.frames[math.floor(self.frame % len(self.frames))], self.rect.center)
-        self.frame += 1/5 * self.maxVelocity/10  # Adjust frame speed based on velocity
-    
     def receiveDamage(self, player):
         distance = (self.position - player.position).length()
         if distance < 100 and player.damage != 0 :
             print("a")
             self.health -= player.damage
-
 
 
 class Vulture(Bird):
@@ -132,12 +86,14 @@ class Vulture(Bird):
         """
         dif = player.position - self.position
 
+        print(f'dif = {dif} , player = {player.position} , bird = {self.position}')
+
         # Set direction based on player position
         if dif.x < 0:
             self.imagePath = f'assets/sprites/birds/birdFlying{self.type}Left.png'
         else:
             self.imagePath = f'assets/sprites/birds/birdFlying{self.type}Right.png'
-        self.frames = createAnimation(self)
+        self.frames = create_bird_animation(self)
 
         distance = dif.length()
         self.velocity.x += dif.x * 0.001  # Move slightly towards player in x direction
@@ -196,34 +152,6 @@ class Vulture(Bird):
             self.velocity.x = dif.x * 0.1
         else:
             self.dashTime = 0
-
-
-    def check_corners(self, screen_width, screen_height):
-        """
-        Check if the vulture has moved off the screen vertically.
-
-        Args:
-            screen_width (int): The width of the game screen.
-            screen_height (int): The height of the game screen.
-
-        Returns:
-            bool: True if the vulture is off the screen, False otherwise.
-        """
-        if self.position.y < 0 or self.position.y > screen_height:
-            return True
-        return False
-
-
-    def render(self, screen):
-        """
-        Render the vulture on the screen.
-
-        Args:
-            screen (pygame.Surface): The screen to render the vulture on.
-        """
-       
-        screen.blit(self.rotatedImage, self.rect.center)
-        self.frame += 1 / 5 * self.velocity.length() / 10
 
     
     def checkCollision(self, v2):
@@ -288,7 +216,7 @@ class Poop:
         self.position = position
         self.velocity = velocity
         self.damage = 10  # Default damage
-        self.image = loadImage(self.imagePath, (size, size))
+        self.image = load_image(self.imagePath, (size, size))
         self.color = color
         self.size = size
         self.rect = pygame.Rect(*self.position, self.size, self.size)
@@ -317,17 +245,7 @@ class Poop:
         player.life -= self.damage  # Reduce player's life by damage
         self.dissapear = True  # Mark the poop to disappear after hitting the player
 
-    def render(self, screen):
-        """
-        Render the poop on the screen.
-
-        Args:
-            screen (pygame.Surface): The surface to render the poop on.
-        """
-        screen.blit(self.image, self.rect.center)
-        # pygame.draw.rect(screen, self.color, self.rect)  # Optional: draw the rectangle
-
-
+    
 class Pigeon(Bird):
     """
     A class to represent a Pigeon enemy, a type of Bird that can drop poop.
@@ -449,7 +367,11 @@ def update(screen, camera, player):
         v.move(player)  # Move vulture towards player
         if v.rect.colliderect(player.rect):  # Check for collision with player
             v.dealDamage(player)
-        v.render(screen)  # Render the vulture
+        
+        v.rect.x -= camera.position.x
+        v.rect.y -= camera.position.y
+
+        render_vulture(v,screen)  # Render the vulture
         v.receiveDamage(player)
 
         for v2 in vultures:
@@ -458,7 +380,11 @@ def update(screen, camera, player):
     # Move and render each pigeon
     for p in pigeons:
         p.move()  # Move pigeon
-        p.drawAnimation(screen)  # Draw the pigeon's animation
+
+        p.rect.x -= camera.position.x
+        p.rect.y -= camera.position.y
+
+        draw_bird_animation(p,screen) # Draw the pigeon's animation
         p.receiveDamage(player)
 
         # Remove poops that have disappeared
@@ -468,4 +394,8 @@ def update(screen, camera, player):
         for poop in p.poops:
             if poop.rect.colliderect(player.rect):  # Check for poop collision with player
                 poop.dealDamage(player)
-            poop.render(screen)  # Render the poop
+
+            p.rect.x -= camera.position.x
+            p.rect.y -= camera.position.y
+
+            render_poop(poop,screen)  # Render the poop

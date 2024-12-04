@@ -59,4 +59,24 @@ def load_game_assets():
     )
     
 
-    
+def create_bird_animation(entity, rotation=0):
+    """
+    Create an animation by slicing the sprite sheet of the entity into frames.
+
+    Args:
+        entity (object): The entity (e.g., bird) with the sprite sheet data.
+        rotation (int, optional): Rotation angle for frames. Default is 0.
+
+    Returns:
+        list: A list of frames (surfaces) for the animation.
+    """
+    image = pygame.image.load(entity.imagePath)  # Load the sprite sheet
+    frames = [
+        pygame.transform.scale(    
+            image.subsurface(i * entity.original_frame_dimension[0], 0, *entity.original_frame_dimension),
+            entity.scaled_frame_dimension
+        )
+        for i in range(8)  # Assuming there are 8 frames in the sprite sheet
+    ]
+    return frames
+
