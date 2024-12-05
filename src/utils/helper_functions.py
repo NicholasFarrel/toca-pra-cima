@@ -24,7 +24,7 @@ class Button:
         self.surface = self.font.render(self.label, self.antialias, self.normal_color)
         self.position = (position[0] - self.surface.get_width() // 2, position[1])
  
- 
+
 class Title:
     def __init__(self,font,label,antialias,color,position):
         self.font = font
@@ -33,6 +33,7 @@ class Title:
         self.color = color
         self.surface = self.font.render(self.label, self.antialias, self.color)
         self.position = (position[0] - self.surface.get_width() // 2, position[1]) 
+
 
 
 def update_colors(menu_assets):
