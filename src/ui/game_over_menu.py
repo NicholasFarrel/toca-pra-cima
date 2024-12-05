@@ -11,7 +11,7 @@ from src.utils.helper_functions import update_colors, Button, Title
 
 pygame.init()
 
-title = Title(pygame.font.SysFont(None, 72),"VOCÊ MORREU",True, WHITE)
+title = Title(pygame.font.SysFont(None, 72),"VOCÊ MORREU",True, WHITE, (SCREEN_WIDTH//2, SCREEN_HEIGHT//4))
 start_game_button = Button(None, 48, 'Voltar ao Iniciar', True, BLUE, WHITE, (SCREEN_WIDTH//2, SCREEN_HEIGHT//2))
 quit_button = Button(None, 48, "Quit", True, BLUE, WHITE, (SCREEN_WIDTH//2, SCREEN_HEIGHT//2 + 60))
 

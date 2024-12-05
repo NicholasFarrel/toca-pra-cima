@@ -24,7 +24,6 @@ def render_main_menu(screen, menu):
     screen.blit(start_game_button.surface, start_game_button.position)
     screen.blit(quit_button.surface, quit_button.position)
 
-
 def render_game_over_menu(screen, menu):
     title = menu['title']
     start_game_button = menu['start_game_button']
@@ -36,6 +35,21 @@ def render_game_over_menu(screen, menu):
     screen.blit(start_game_button.surface, start_game_button.position)
     screen.blit(quit_button.surface, quit_button.position)
 
+def render_main_menu(screen, menu):
+    title = menu['title']
+    title2 = menu['title2']
+    title3 = menu['title3']
+    start_game_button = menu['start_game_button']
+    quit_button = menu['quit_button']
+    background = menu['background']
+
+    screen.fill(background.color)
+    screen.blit(background.image, background)
+    screen.blit(title.surface, title.position)
+    screen.blit(title2.surface, title2.position)
+    screen.blit(title3.surface, title3.position)
+    screen.blit(start_game_button.surface, start_game_button.position)
+    screen.blit(quit_button.surface, quit_button.position)
 
 
 def render_pause_menu(screen, pause_menu_assets):
@@ -47,6 +61,7 @@ def render_pause_menu(screen, pause_menu_assets):
     screen.fill(pause_background['color'])
     screen.blit(pause_title.surface, pause_title.position)
     screen.blit(return_button.surface, return_button.position)
+    
     
 
 def render_scene(screen,camera, player, background, magnesios):
