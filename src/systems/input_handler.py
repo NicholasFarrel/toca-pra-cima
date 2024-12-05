@@ -156,7 +156,7 @@ def player_movements(player,camera,background,keys):
         player.image = char['movingLeftFrames'][math.floor(player.frame % len(char['movingLeftFrames']))]
     
     if player.last_key_pressed == 'd' and d and player.position.x + player.image.get_width()+ player.velocity.x <= background.image.get_width():
-        if player.position.x - camera.position.x > 0.6 * SCREEN_WIDTH and camera.position.x +4*player.image.get_width() + player.velocity.x <= background.image.get_width():
+        if player.position.x - camera.position.x > 0.6 * SCREEN_WIDTH and camera.position.x +4*player.image.get_width() + player.velocity.x <= background.image.get_width() - 200:
             camera.position.x += player.velocity.x
 
         player.position.x += player.velocity.x

@@ -11,11 +11,11 @@ def createAnimation(rotation = 0):
     climbingImage = pygame.image.load(char['image_path']['climbingImage'])
     movingLeftImage = pygame.image.load(char['image_path']['movingLeftImage'])
     movingRightImage = pygame.image.load(char['image_path']['movingRightImage'])
-    jumpingImage = pygame.image.load(char['image_path']['jumpingImage'])
+    #jumpingImage = pygame.image.load(char['image_path']['jumpingImage'])
     
     climbingFrames = [
         pygame.transform.scale(    
-            climbingImage.subsurface(i * char['original_frame_dimension'][0], 0, *char['original_frame_dimension']),
+            climbingImage.subsurface(i * 500, 0, *(500,500)),
             char['scaled_frame_dimension']
         )
         for i in range(7)
@@ -37,19 +37,19 @@ def createAnimation(rotation = 0):
         for i in range(7)
     ]
     
-    jumpingFrames = [
+    """jumpingFrames = [
         pygame.transform.scale(
             jumpingImage.subsurface(i * char['original_frame_dimension'][0], 0, *char['original_frame_dimension']),
             char['scaled_frame_dimension']
         )
         for i in range(10)
     ]
-
-    return climbingFrames, movingLeftFrames, movingRightFrames, jumpingFrames
+"""
+    return climbingFrames, movingLeftFrames, movingRightFrames #, jumpingFrames
 
 
 def load_game_assets():
-    char['climbingFrames'], char['movingLeftFrames'], char['movingRightFrames'], char['jumpingFrames'] = createAnimation()
+    char['climbingFrames'], char['movingLeftFrames'], char['movingRightFrames']= createAnimation()
     
     background['raw_image'] = pygame.image.load(background['image_path'])
     b_dim = background['raw_image'].get_size()

@@ -7,9 +7,9 @@ GRAVITY = 10
 GRAVITY_FORCE = pygame.Vector2(0,GRAVITY)
 
 max_life = 10
-max_birds = 10
+max_birds = 15
 max_feathers = 5
-bird_life = 2
+bird_life = 1
 damage_length = 100
 life = 3
 num_magnesios = 100
@@ -35,7 +35,7 @@ char = {
             'movingRightImage' : 'assets/sprites/player/movingRightImage.png',
             'jumpingImage' : 'assets/sprites/player/jumpingImage.png'
         },
-    'original_frame_dimension' : (500,500),
+    'original_frame_dimension' : (256,256),
     'size' : 100,
 }
 char['scaled_frame_dimension'] = (1.5*char['size'], 1.5*char['size'])

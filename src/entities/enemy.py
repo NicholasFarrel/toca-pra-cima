@@ -82,6 +82,7 @@ class Bird:
         self.scaled_frame_dimension = scaled_frame_dimension
         self.frames = create_bird_animation(self)
         self.frame = 0
+        self.time = 60*6
         self.feathers = []
         self.damage_cooldown = 10
 
@@ -94,7 +95,7 @@ class Vulture(Bird):
     Methods include movement, dashing, damage dealing, and rendering.
     """
 
-    def __init__(self, position, type, maxVelocity=4, health=3, damage=1, size=100, color=(255, 0, 0)):
+    def __init__(self, position, type, maxVelocity=10, health = bird_life, damage=1, size=100, color=(255, 0, 0)):
         """
         Initialize a Vulture with the provided parameters.
 
@@ -307,7 +308,7 @@ class Pigeon(Bird):
         Drops a poop after a specific interval and moves all dropped poops.
     """
 
-    def __init__(self, position, health=bird_life, size=50, maxVelocity=5, color=(0, 0, 255)):
+    def __init__(self, position, health, size=50, maxVelocity=10, color=(0, 0, 255)):
         """
         Initialize a Pigeon object with given parameters.
 
@@ -428,6 +429,13 @@ def update(screen, camera, player, enemies):
     for v in vultures:
         v.move(player)  # Move vulture towards player
         dif = v.position - player.position
+        v.time -= 1
+        if v.time < 0:
+            for i in range(random.randint(3,max_feathers)):
+                f = Feather( (random.uniform(v.position.x , v.position.x + v.size), random.uniform(v.position.y, v.position.y + v.size) -30), v.type)
+                feathers.append(f)
+            v.health = -1
+        
         distance = dif.length()
         if distance < 50:  # Check for collision with player
             v.dealDamage(player)
@@ -438,6 +446,7 @@ def update(screen, camera, player, enemies):
 
         for v2 in vultures:
             v.checkCollision(v2)
+
 
     # Move and render each pigeon
     pigeons[:] = [p for p in pigeons if p.health > 0]

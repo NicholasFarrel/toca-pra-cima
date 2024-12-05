@@ -33,7 +33,7 @@ is_in_main_menu = True
 finished = False
 
 pygame.mixer.music.load('assets/audio/music/music.mp3')
-pygame.mixer.music.set_volume(0)  # Volume de 0.0 a 1.0
+pygame.mixer.music.set_volume(0.5)  # Volume de 0.0 a 1.0
 pygame.mixer.music.play(loops=-1)  # Reproduz em loop infinito
 
 images=[]
@@ -74,7 +74,7 @@ def main_loop():
                 is_paused = handle_input(girl, camera,enemies, background, is_paused)
                 render_scene(screen, camera, girl, background, magnesios)
                 enemy.update(screen, camera, girl, enemies)
-                print(girl.position.y, background.image.get_height() - SCREEN_HEIGHT)
+                #print(girl.position.y, background.image.get_height() - SCREEN_HEIGHT)
                 if girl.life <= 0:
                     is_dead = True
 
