@@ -11,16 +11,27 @@ from src.utils.helper_functions import update_colors, Button, Title
 
 pygame.init()
 
-pause_title = Title(pygame.font.SysFont(None, 72),"Menu de Pause", True, WHITE)
-return_button = Button(None, 48, "Iniciar Jogo", True, BLUE, WHITE, (SCREEN_WIDTH // 2, SCREEN_HEIGHT//2) )
+pause_title = Title(
+    pygame.font.Font('assets/fonts/ChunkFive-Regular.otf', 72),"PAUSE", 
+    True, WHITE, (SCREEN_WIDTH//2, SCREEN_HEIGHT//4)
+    )
+return_button = Button(
+    'assets/fonts/ChunkFive-Regular.otf', 48, 
+    'VOLTAR', True, (244, 200, 6), WHITE, (SCREEN_WIDTH//2, SCREEN_HEIGHT//2)
+    )
+pause_title2 = Title(
+    pygame.font.Font('assets/fonts/ChunkFive-Regular.otf', 52),"VOLTAR",
+    True,(0, 0, 0), ((SCREEN_WIDTH//2)+2, SCREEN_HEIGHT//2 + 60)
+    )
 
 pause_background = {
-    'color' : BLUE
+    'color' : (189, 98, 46)
 }
 
 pause_menu_assets={
     'pause_title' : pause_title,
     'return_button' : return_button,
+    'pause_title2' : pause_title2,
     'pause_background' : pause_background
 }
 pause_menu_assets['buttons'] = [return_button]

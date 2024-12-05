@@ -7,22 +7,39 @@ from src.game.settings import *
 from src.systems.rendering import render_main_menu, render_pause_menu
 from src.systems.input_handler import handle_input_for_menu, handle_input_for_pause_menu
 from src.game.constants import *
-from src.utils.helper_functions import update_colors, Button, Title
+from src.utils.helper_functions import update_colors, Button, Title, Background
 
 pygame.init()
 
-title = Title(pygame.font.SysFont(None, 72),"Menu Principal",True, WHITE)
-start_game_button = Button(None, 48, 'Iniciar Jogo', True, BLUE, WHITE, (SCREEN_WIDTH//2, SCREEN_HEIGHT//2))
-quit_button = Button(None, 48, "Quit", True, BLUE, WHITE, (SCREEN_WIDTH//2, SCREEN_HEIGHT//2 + 60))
+title = Title(
+    pygame.font.Font('assets/fonts/ChunkFive-Regular.otf', 72),"Toca Pra Cima",
+    True,(255, 253, 130), (SCREEN_WIDTH//2, SCREEN_HEIGHT//10)
+    )
+title2 = Title(
+    pygame.font.Font('assets/fonts/ChunkFive-Regular.otf', 52),"PLAY",
+    True,(0, 0, 0), ((SCREEN_WIDTH//2)+2, SCREEN_HEIGHT//2)
+    )
+title3 = Title(
+    pygame.font.Font('assets/fonts/ChunkFive-Regular.otf', 52),"SAIR",
+    True,(0, 0, 0), ((SCREEN_WIDTH//2)+2, SCREEN_HEIGHT//2 + 60)
+    )
 
+start_game_button = Button(
+    'assets/fonts/ChunkFive-Regular.otf', 48, 
+    'PLAY', True, (244, 200, 6), WHITE, (SCREEN_WIDTH//2, SCREEN_HEIGHT//2)
+    )
 
-background = {
-    'color' : BLACK,
-}
+quit_button = Button(
+    'assets/fonts/ChunkFive-Regular.otf', 48, 
+    "SAIR", True, (244, 200, 6), WHITE, (SCREEN_WIDTH//2, SCREEN_HEIGHT//2 + 60)
+    )
+background = Background(BLACK, 'assets/sprites/background/start.png')        
 
 main_menu_assets = {
     'background' : background,  
     'title' : title,
+    'title2' : title2,
+    'title3' : title3,
     'start_game_button': start_game_button,
     'quit_button' : quit_button
 }
