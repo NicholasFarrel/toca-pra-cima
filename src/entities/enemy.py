@@ -5,6 +5,7 @@ from src.systems.rendering import load_image, draw_bird_animation, render_poop, 
 from src.game.assets import create_bird_animation
 from src.systems.physics import check_vulture_corners, apply_gravity
 from src.game.constants import *
+from src.game.settings import *
 
 class Feather:
     def __init__(self, position, type, size = 20):
@@ -93,7 +94,7 @@ class Vulture(Bird):
     Methods include movement, dashing, damage dealing, and rendering.
     """
 
-    def __init__(self, position, type, maxVelocity=10, health=3, damage=1, size=100, color=(255, 0, 0)):
+    def __init__(self, position, type, maxVelocity=4, health=3, damage=1, size=100, color=(255, 0, 0)):
         """
         Initialize a Vulture with the provided parameters.
 
@@ -306,7 +307,7 @@ class Pigeon(Bird):
         Drops a poop after a specific interval and moves all dropped poops.
     """
 
-    def __init__(self, position, health=3, size=50, maxVelocity=5, color=(0, 0, 255)):
+    def __init__(self, position, health=bird_life, size=50, maxVelocity=5, color=(0, 0, 255)):
         """
         Initialize a Pigeon object with given parameters.
 
@@ -399,6 +400,7 @@ def initialize(player):
 
     return [pigeons, vultures]
 
+col = ['BLUE', 'YELLOW', 'RED']
 
 def update(screen, camera, player, enemies):
     """
@@ -415,6 +417,11 @@ def update(screen, camera, player, enemies):
     feathers[:] = [f for f in feathers if f.time > 0]
     update_feathers(screen,camera)
 
+    for i in range(max_birds - len(vultures)):
+        vPos = (-100,random.randint(-SCREEN_HEIGHT + int(camera.position.y), int(camera.position.y)))
+        v = Vulture(vPos, col[random.randint(0,len(col)-1)])
+        vultures.append(v)
+
 
     # Move and render each vulture
     vultures[:] = [v for v in vultures if v.health > 0]
@@ -424,7 +431,6 @@ def update(screen, camera, player, enemies):
         distance = dif.length()
         if distance < 50:  # Check for collision with player
             v.dealDamage(player)
-        
         
         render_vulture(v,screen, camera)  # Render the vulture
         v.damage_cooldown -= 1
@@ -452,3 +458,6 @@ def update(screen, camera, player, enemies):
                 poop.dealDamage(player)
 
             render_poop(poop,screen,camera)  # Render the poop
+
+
+

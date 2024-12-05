@@ -9,6 +9,61 @@ import pygame
 import math
 import random
 
+from src.game.constants import *
+
+
+def handle_input_for_game_over_menu(game_over_menu_assets):
+    start_game_button = game_over_menu_assets['start_game_button']
+    quit_button = game_over_menu_assets['quit_button']
+
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            quit()
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_p:  # Enter key to start the game
+                return True  # Exit the main menu and start the game
+            elif event.key == pygame.K_q:  # 'Q' to quit the game
+                pygame.quit()
+                quit()
+
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            mouse_position = pygame.mouse.get_pos()
+            if event.button == 1:
+                if (mouse_position[0] - start_game_button.position[0] <=  start_game_button.surface.get_width() and mouse_position[0] - start_game_button.position[0] >= 0) and (mouse_position[1] - start_game_button.position[1] <=  start_game_button.surface.get_height() and mouse_position[1] - start_game_button.position[1] >= 0):           
+                    return True
+                if (mouse_position[0] - quit_button.position[0] <=  quit_button.surface.get_width() and mouse_position[0] - quit_button.position[0] >= 0) and (mouse_position[1] - quit_button.position[1] <=  quit_button.surface.get_height() and mouse_position[1] - quit_button.position[1] >= 0):           
+                    pygame.quit()
+                    quit()
+                
+    return False # Keep the player in the main menu until they choose to start
+
+
+def handle_input_for_finished_menu(game_over_menu_assets):
+    start_game_button = game_over_menu_assets['start_game_button']
+    quit_button = game_over_menu_assets['quit_button']
+
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            quit()
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_p:  # Enter key to start the game
+                return True  # Exit the main menu and start the game
+            elif event.key == pygame.K_q:  # 'Q' to quit the game
+                pygame.quit()
+                quit()
+
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            mouse_position = pygame.mouse.get_pos()
+            if event.button == 1:
+                if (mouse_position[0] - start_game_button.position[0] <=  start_game_button.surface.get_width() and mouse_position[0] - start_game_button.position[0] >= 0) and (mouse_position[1] - start_game_button.position[1] <=  start_game_button.surface.get_height() and mouse_position[1] - start_game_button.position[1] >= 0):           
+                    return True
+                if (mouse_position[0] - quit_button.position[0] <=  quit_button.surface.get_width() and mouse_position[0] - quit_button.position[0] >= 0) and (mouse_position[1] - quit_button.position[1] <=  quit_button.surface.get_height() and mouse_position[1] - quit_button.position[1] >= 0):           
+                    pygame.quit()
+                    quit()
+                
+    return False # Keep the player in the main menu until they choose to start
 
 
 def handle_input_for_pause_menu(pause_menu_assets):
@@ -53,6 +108,9 @@ def handle_input_for_menu(main_menu_assets):
             if event.button == 1:
                 if (mouse_position[0] - start_game_button.position[0] <=  start_game_button.surface.get_width() and mouse_position[0] - start_game_button.position[0] >= 0) and (mouse_position[1] - start_game_button.position[1] <=  start_game_button.surface.get_height() and mouse_position[1] - start_game_button.position[1] >= 0):           
                     return False
+                if (mouse_position[0] - quit_button.position[0] <=  quit_button.surface.get_width() and mouse_position[0] - quit_button.position[0] >= 0) and (mouse_position[1] - quit_button.position[1] <=  quit_button.surface.get_height() and mouse_position[1] - quit_button.position[1] >= 0):           
+                    pygame.quit()
+                    quit()
                 
     return True  # Keep the player in the main menu until they choose to start
 
@@ -139,11 +197,17 @@ def handle_bird(enemies, mouse_buttons, camera):
             for bird in bird_list:
                 bird_screen_position = bird.rect.center - camera.position
                 dif = bird_screen_position - mouse_position
-                if dif.length() < 100 and bird.damage_cooldown < 0:
-                    for i in range(random.randint(3,8)):
+                if dif.length() < damage_length and bird.damage_cooldown < 0:
+                    for i in range(random.randint(1,1)):
                         f = Feather( (random.uniform(bird.position.x , bird.position.x + bird.size), random.uniform(bird.position.y, bird.position.y + bird.size) -30), bird.type)
                         bird.feathers.append(f)
                         feathers.append(f)
                     bird.damage_cooldown = 5
                     bird.health -= 1
+                    if bird.health <= 0:
+                        for i in range(random.randint(3,max_feathers)):
+                            f = Feather( (random.uniform(bird.position.x , bird.position.x + bird.size), random.uniform(bird.position.y, bird.position.y + bird.size) -30), bird.type)
+                            bird.feathers.append(f)
+                            feathers.append(f)
+
                         
