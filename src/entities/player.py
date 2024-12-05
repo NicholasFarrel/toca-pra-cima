@@ -40,6 +40,7 @@ class Character:
         self.jumpFrame = 0
         self.damage = 0
         self.last_key_pressed = None
+        self.finished = False
 
 
 class Girl(Character):

@@ -13,7 +13,7 @@ def check_vulture_corners(vulture, screen_width, screen_height):
             bool: True if the vulture is off the screen, False otherwise.
         """
         if vulture.position.y < 0 or vulture.position.y > screen_height:
-            return True
+            vulture.health = -1
         return False
 
 
